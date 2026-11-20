@@ -1,0 +1,20 @@
+{
+  "name": "mechanical-patent-toolkit",
+  "interface": {
+    "displayName": "机械专利撰写"
+  },
+  "plugins": [
+    {
+      "name": "mechanical-patent-drafting",
+      "source": {
+        "source": "local",
+        "path": "./plugins/mechanical-patent-drafting"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
