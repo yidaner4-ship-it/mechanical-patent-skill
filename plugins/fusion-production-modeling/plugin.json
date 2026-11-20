@@ -1,0 +1,13 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "fusion-production-modeling",
+  "version": "0.1.0",
+  "description": "面向制造与装配的机械三维建模、改模和成品复核，适用于 Fusion 或用户指定的其他机械 CAD。",
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "机械制造装配建模"
+      }
+    }
+  }
+}
