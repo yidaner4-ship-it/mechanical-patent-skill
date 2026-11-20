@@ -1,0 +1,13 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "mechanical-patent-drafting",
+  "version": "0.1.0",
+  "description": "中国机械结构类专利申请文件的撰写、套版和图文质检。",
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "机械专利撰写"
+      }
+    }
+  }
+}
