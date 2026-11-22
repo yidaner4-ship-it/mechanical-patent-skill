@@ -1,0 +1,4 @@
+interface:
+  display_name: "申晟专利独立质检"
+  short_description: "成稿后独立检查方案逻辑、公开充分性、形式问题和附图落点及引线质量"
+  default_prompt: "使用 $shensheng-patent-qa 独立质检当前稿件，逐条核实问题、整改并复核实际交付文件。"
