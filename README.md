@@ -5,11 +5,12 @@
 ```text
 用「机械专利撰写」技能审阅这份机械结构实用新型申请稿。
 把独立权利要求概括到核心构造和必要配合，并核对附图标号及引线。
+附图每个独立视图一页，按正文首次引用顺序编号，图体在版心居中，图号放页脚，局部裁断处补断裂线。
 ```
 
 ## 从 GitHub 安装和更新
 
-当前发布版本为 **0.1.0**。安装和更新均使用同一 [GitHub 仓库](https://github.com/yidaner4-ship-it/mechanical-patent-skill)。
+当前发布版本为 **0.1.1**。安装和更新均使用同一 [GitHub 仓库](https://github.com/yidaner4-ship-it/mechanical-patent-skill)。
 
 1. 用支持插件目录的 Codex CLI 添加 GitHub 来源。
 
