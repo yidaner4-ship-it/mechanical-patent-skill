@@ -1,7 +1,7 @@
 {
   "name": "mechanical-patent-toolkit",
   "interface": {
-    "displayName": "机械专利撰写"
+    "displayName": "机械专利撰写与质检"
   },
   "plugins": [
     {

@@ -1,56 +1,72 @@
-# 机械专利撰写与独立质检
+# 机械专利撰写（含默认独立质检）
 
-中国机械结构类发明与实用新型的 Codex 技能。适用于起草和修改权利要求、依用户指定的 Word 模板制作文稿，以及核对说明书和附图。使用时提供本案技术资料、所需权项数量、模板和现有附图。
+中国机械结构类发明与实用新型的 Codex 插件。**安装「机械专利撰写」一个插件，即同时取得撰写与独立质检两个技能。** 实际初稿或改稿文件生成后、最终交付前，默认执行质检、核实整改及成品复核，无须另行提出质检要求。用户当次明确限定范围或要求跳过时遵从其要求。
 
-```text
-用「机械专利撰写」技能审阅这份机械结构实用新型申请稿。
-把独立权利要求概括到核心构造和必要配合，并核对附图标号及引线。
-附图每个独立视图一页，按正文首次引用顺序编号，图体在版心居中，图号放页脚，局部裁断处补断裂线。
+当前撰写插件版本为 **0.2.0**，包内质检技能版本为 **1.2.0**。
+
+## 安装与更新
+
+从本 [GitHub 仓库](https://github.com/yidaner4-ship-it/mechanical-patent-skill) 安装。
+
+```sh
+codex plugin marketplace add yidaner4-ship-it/mechanical-patent-skill --ref main
+codex plugin add mechanical-patent-drafting@mechanical-patent-toolkit
 ```
 
-## 从 GitHub 安装和更新
+支持插件目录的客户端也可从此市场选择「机械专利撰写（含独立质检）」安装。安装包内有两个同级技能：
 
-当前包含「机械专利撰写」**0.1.1** 和「申晟专利独立质检」**1.1.0**。安装和更新均使用同一 [GitHub 仓库](https://github.com/yidaner4-ship-it/mechanical-patent-skill)。
+```text
+plugins/mechanical-patent-drafting/
+├── plugin.json
+└── skills/
+    ├── mechanical-patent-drafting/
+    └── shensheng-patent-qa/
+```
 
-1. 用支持插件目录的 Codex CLI 添加 GitHub 来源。
+已安装旧版撰写插件的电脑，刷新市场来源以获取新版：
 
-   ```sh
-   codex plugin marketplace add yidaner4-ship-it/mechanical-patent-skill --ref main
-   ```
+```sh
+codex plugin marketplace upgrade mechanical-patent-toolkit
+```
 
-2. 在 Codex 桌面版的插件目录选择「机械专利撰写」或「申晟专利独立质检」，安装所需插件后在新对话中调用技能。
-3. 发布者将新版本推送到 `main` 后，运行以下命令刷新已跟踪的来源。
+在新对话中查看更新后的技能，客户端仍持有旧版时按其提示重载。GitHub 发布不会主动改变尚未刷新来源的设备，也不会为未安装插件的设备代为安装。
 
-   ```sh
-   codex plugin marketplace upgrade mechanical-patent-toolkit
-   ```
+离线安装时，下载仓库 ZIP，将上述 `skills/` 中的**两个技能文件夹一起复制**到本地 `.agents/skills/`，保留同级关系。仅复制撰写技能会缺少它调用的质检入口。离线 ZIP 是固定版本，更新时需重新取得文件。
 
-如果当前对话仍显示旧版本，可新开对话，必要时重启客户端。参见 [OpenAI 插件市场命令](https://developers.openai.com/plugins/build/plugins#add-a-marketplace-from-the-cli)。
+原独立「申晟专利独立质检」插件继续供只需审稿的使用者安装，与撰写包内质检保持同版。已安装新版撰写插件的电脑无需重复安装独立质检；此前两个插件都装过的设备可移除独立质检插件，以减少重复入口。
 
-具备插件管理功能的 ChatGPT 工作区可由管理员从 GitHub 导入此插件市场、跟踪发布分支并配置成员可用范围。新导入的市场每天自动检查更新，管理员也可立即同步。独立安装的个人也可自行在本机定时执行上述刷新命令。参见 [工作区 GitHub 同步](https://learn.chatgpt.com/docs/enterprise/plugin-management#keep-plugins-up-to-date)。
+## 默认撰写与质检流程
 
-希望离线安装时，可下载仓库 ZIP，解压后将 `plugins/mechanical-patent-drafting/skills/mechanical-patent-drafting` 文件夹复制到用户目录下的 `.agents/skills/`。ZIP 是固定版本，升级时需另行下载。此包不安装钩子或后台任务。参见 [Codex 本地技能位置](https://learn.chatgpt.com/docs/build-skills#where-codex-loads-local-skills)。
+1. 从用户提供的交底、模型、附图和指定底稿起草或修改，核实核心结构、必要配合及说明书支持，按本案要求控制权项数量和文本范围。
+2. 用指定 Word 模板制作实际文稿及附图，查看实际渲染。
+3. 交付前读取同包 [质检入口](plugins/mechanical-patent-drafting/skills/shensheng-patent-qa/SKILL.md)，冻结拟交付版本与依据，交由未参与本轮起草的独立审阅者检查。
+4. 按每次名称出现核标号，逐图逐根看引线落点，检查权项引用、因果、工况及支持；逐条核实意见，有依据且获授权的问题整改后同步各交付副本。
+5. 复查实际成品、隐私与最终文件摘要值，保存审核记录并说明未核项，再交付。
+
+这是技能工作流指令，不安装后台任务或向外部平台自动上传稿件。未具备独立审阅、实际看图或渲染条件时，完成其他可做项目并明确记录对应未完成范围；扫描器通过不能替代完整质检。
+
+## 随包质检能力与依赖
+
+核心审稿方法、逐处扫描、机械图文复核及报告格式均在安装包内，新电脑无需另装上游技能或联网读取方法。
+
+- [审稿方法与证据](plugins/mechanical-patent-drafting/skills/shensheng-patent-qa/references/review-method.md)：逐项引用路径、先行基础、技术因果、工况和支持。
+- [名称及标号逐处核对](plugins/mechanical-patent-drafting/skills/shensheng-patent-qa/references/component-occurrences.md)：每次名称的段落、字符位置、实有标号、结论及例外依据。同段另一处正确标号不能替代当前检查。
+- [机械图文与真实修订复核](plugins/mechanical-patent-drafting/skills/shensheng-patent-qa/references/mechanical-review.md)：每图每次标号的实体归属、引线、剖切、图文及交付副本一致性。
+- [审核记录格式](plugins/mechanical-patent-drafting/skills/shensheng-patent-qa/references/report-record.md)：覆盖范围、逐处结果、问题证据、整改复核、未核项及最终摘要值。默认输出 Markdown。
+
+随包扫描脚本只需 Python 3 标准库；人工审稿本身不要求安装 Python。Word/PDF 渲染、CAD 查看及独立审阅使用运行环境实际提供的能力；不足处如实列明。新的专利检索及最新法律依据按当轮任务和工具核验。
+
+已有本地 `patent-draft-review` 时，可额外使用其详细参考或兼容的离线 HTML 报告生成器，它不是核心质检的必装条件。该组件单独维护，未复制其代码；来源为 [patent-review-kit v0.6.1 固定提交](https://github.com/KrisMiao97/patent-review-kit/tree/676ae000af132d7db9ba59821d8fcd2234288fdb)。使用前核对完整组件、Python 环境和数据格式；没有该组件时仍按包内格式完成 Markdown 记录。
+
+## 使用示例
+
+```text
+用机械专利撰写技能，根据本地交底和指定模板完成实用新型五书。
+权利要求控制在15项以内。按包内默认流程完成独立质检、核实整改和最终复核后交付。
+```
+
+仅审已有稿件时也可直接调用 `$shensheng-patent-qa`。本包不附带客户案卷、CAD、模板、批准样图或本机路径；所需材料由使用者在本地提供。
 
 ## 发布维护
 
-内部版有变化时，先选出可共享的改动，核对公开版内容及依赖，再更新公开版和版本号、提交并推送到 `main`。使用者从 GitHub 获取推送后的版本。公开版包含通用撰写、套版和质检规则，撰写所需的案卷、CAD 文件和模板由使用者在本地提供。
-
-## 申晟专利独立质检 1.1.0
-
-独立插件入口：[shensheng-patent-qa](plugins/shensheng-patent-qa/skills/shensheng-patent-qa/SKILL.md)。可单独核稿，也可在初稿或改稿完成后执行。逐处记录每次部件名称、别名、实有标号、段落与字符位置；同段其他位置已带号不能替代当前检查。附图按每图每次标号逐根看落点，术语、权项、图例与最终交付副本同步复核。
-
-公开包包含逐处核对规范、Python 扫描器及机械图文复核规则，不附带客户案卷、CAD、批准样图或本机环境。
-
-### 依赖与使用
-
-- 名称及标号扫描器仅需 Python 3 标准库，可独立运行。配置和示例见[逐处核对说明](plugins/shensheng-patent-qa/skills/shensheng-patent-qa/references/component-occurrences.md)。它读取 DOCX 并输出 JSON、CSV 候选，不能代替人工语义复核或实际核图。
-- 完整审稿方法采用独立上游 [patent-review-kit v0.6.1 固定提交](https://github.com/KrisMiao97/patent-review-kit/tree/676ae000af132d7db9ba59821d8fcd2234288fdb)。已有本地 `patent-draft-review` 时优先使用；也可在线读取该固定版本方法和参考。只读取方法，无须上传稿件。
-- 生成离线 HTML 报告需要本地完整的上游 `patent-draft-review` 目录及 Python 3.10+。可下载[固定提交 ZIP](https://github.com/KrisMiao97/patent-review-kit/archive/676ae000af132d7db9ba59821d8fcd2234288fdb.zip)，将其中 `patent-draft-review` 目录作为独立技能安装到本地技能目录。保留其 `scripts/`、`assets/` 和 `references/` 等完整结构，不只复制一个脚本。上游单独维护，本仓库未复制其代码；Word 等附加输出按上游实际依赖核验。没有报告组件时交同字段 Markdown，并说明未生成 HTML。
-- 已有 `mechanical-patent-drawings` 时连同其参考读取；没有时按随包[机械图文复核](plugins/shensheng-patent-qa/skills/shensheng-patent-qa/references/mechanical-review.md)执行。用户认可的样图由使用者本地提供，未取得样图时记录样式基准未核。
-
-离线安装本入口时，将 `plugins/shensheng-patent-qa/skills/shensheng-patent-qa` 文件夹复制到本地技能目录；上游报告组件按上段另行安装。
-
-```text
-用 $shensheng-patent-qa 独立质检本轮实际五书及附图。
-按名称每次出现建立逐处表，逐根看附图落点；核实整改后复查实际交付副本，注明未核项。
-```
+撰写入口与包内质检共同随 `mechanical-patent-drafting` 插件更新。质检源以该插件的 `skills/shensheng-patent-qa/` 为准，独立质检插件保留相同发布副本。发布时核对两处质检目录逐文件一致、相对链接、扫描行为、隐私及实际 GitHub 内容；提升对应版本并推送 `main`。

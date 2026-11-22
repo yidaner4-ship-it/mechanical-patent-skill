@@ -1,12 +1,12 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "mechanical-patent-drafting",
-  "version": "0.1.1",
-  "description": "中国机械结构类专利申请文件的撰写、套版和图文质检。",
+  "version": "0.2.0",
+  "description": "中国机械结构类专利撰写与套版，随包安装独立质检，成稿及改稿后默认检查、整改并复核。",
   "extensions": {
     "com.openai": {
       "interface": {
-        "displayName": "机械专利撰写"
+        "displayName": "机械专利撰写（含独立质检）"
       }
     }
   }
