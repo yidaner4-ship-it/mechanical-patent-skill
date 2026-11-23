@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
   "plugin": "mechanical-patent-workflow",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "canonical_skills": "plugins/mechanical-patent-workflow/skills",
   "current_archives": {
     "plugin": "mechanical-patent-workflow-latest.zip",
     "offline": "mechanical-patent-toolkit-latest.zip",
-    "versioned_plugin": "mechanical-patent-workflow-1.0.0.zip"
+    "versioned_plugin": "mechanical-patent-workflow-1.0.1.zip"
   },
   "archives": [
     {
@@ -16,8 +16,8 @@
     },
     {
       "name": "mechanical-patent-toolkit-latest.zip",
-      "sha256": "d1d5405eebdeaeeb0588f15fffcf039d45ccb2a1412eb3aa5738025a947ca855",
-      "bytes": 6259298
+      "sha256": "d54703334c3bfc072da56deca5787701c24ae36700756c6d40f170a0e3cb0063",
+      "bytes": 6263465
     },
     {
       "name": "mechanical-patent-workflow-1.0.0.zip",
@@ -25,15 +25,20 @@
       "bytes": 6252469
     },
     {
+      "name": "mechanical-patent-workflow-1.0.1.zip",
+      "sha256": "375b67ad0a97b2f42d94f535cf881155487cb08477f103a9587fe3fa17d47b07",
+      "bytes": 6256672
+    },
+    {
       "name": "mechanical-patent-workflow-latest.zip",
-      "sha256": "151857a4c138c221c4228665f6fdebb5c8d33aceccb561883a0ac028a445d1a5",
-      "bytes": 6252469
+      "sha256": "375b67ad0a97b2f42d94f535cf881155487cb08477f103a9587fe3fa17d47b07",
+      "bytes": 6256672
     }
   ],
   "plugin_files": [
     {
       "path": ".codex-plugin/plugin.json",
-      "sha256": "d08023f77de36e7b75df013a02a38695a104f128eeb5e125621238b61cbd11cf",
+      "sha256": "5c8570445e922639a70ad6d3a766899191db3634d01e6c03ae6ca09d27c39f5f",
       "mode": "0644",
       "bytes": 1176
     },
@@ -45,9 +50,9 @@
     },
     {
       "path": "README.md",
-      "sha256": "e3d78b6557fde3e4ade736539b58096b3c820d7db0a3786e1e0136770e56a58f",
+      "sha256": "1b9bbf0fc782e6cae4d765c191f573766992001ddd32b8b9ad2b3702431b9fdf",
       "mode": "0644",
-      "bytes": 1998
+      "bytes": 2085
     },
     {
       "path": "THIRD_PARTY_NOTICES.md",
@@ -57,7 +62,7 @@
     },
     {
       "path": "plugin.json",
-      "sha256": "4b5dc445b02d35d5f78b23677980c50d1dee8f5d4d078240cc81372661a7cda8",
+      "sha256": "2e9b2bd0053e0e47d29ae434902a05bc547636ce5c19f8023fab74f7573cab00",
       "mode": "0644",
       "bytes": 1595
     },
@@ -93,15 +98,15 @@
     },
     {
       "path": "skills/fusion-production-modeling/SKILL.md",
-      "sha256": "560f3cdf3cca75a5e440fd9f56b8f6aba56a6b1ad69000f9e77de24c4d6f6732",
+      "sha256": "0232f7a7622f5239ba69a3eb4a0ce726f3d719579f16b312536d986b9eeaf9db",
       "mode": "0644",
-      "bytes": 7313
+      "bytes": 8033
     },
     {
       "path": "skills/fusion-production-modeling/agents/openai.yaml",
-      "sha256": "6f52c5bb0b6ad8333960b6f9af44c0d5850df1e911a5bfefd2d022cc9384d8d4",
+      "sha256": "03225c46c166423056511a98a57592d5533618c7d7a72497ad35e8bc602d98af",
       "mode": "0644",
-      "bytes": 393
+      "bytes": 465
     },
     {
       "path": "skills/fusion-production-modeling/references/assembly.md",
@@ -122,10 +127,16 @@
       "bytes": 5746
     },
     {
-      "path": "skills/fusion-production-modeling/references/verification.md",
-      "sha256": "fe0e505d21435a146ad4bb7a5da4806152590c3effc5fa3088db648973c69fe8",
+      "path": "skills/fusion-production-modeling/references/real-components.md",
+      "sha256": "80690e2177b186dc7e97101f693a5d55e99ae2f97133234516f0c93182260af1",
       "mode": "0644",
-      "bytes": 10660
+      "bytes": 6398
+    },
+    {
+      "path": "skills/fusion-production-modeling/references/verification.md",
+      "sha256": "db5543814fb68c19548699185e1a936434feefbf511d822785fcec70f9d75c98",
+      "mode": "0644",
+      "bytes": 11152
     },
     {
       "path": "skills/mechanical-patent-drawings/SKILL.md",
@@ -3496,7 +3507,7 @@
   ],
   "validation": {
     "plugin": "mechanical-patent-workflow",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "canonical_skills": "plugins/mechanical-patent-workflow/skills",
     "root_skills": [
       "documents",
@@ -3512,8 +3523,8 @@
       "spreadsheets"
     ],
     "skill_entrypoints": 20,
-    "file_count": 577,
-    "checked_local_references": 166,
+    "file_count": 578,
+    "checked_local_references": 168,
     "approved_style": {
       "json": "skills/mechanical-patent-drawings/references/approved-leader-style.json",
       "json_sha256": "bf9d9bb967977c3aeba20e56f00d36f2f2655d234d06db8936df1a71edf74e51",
