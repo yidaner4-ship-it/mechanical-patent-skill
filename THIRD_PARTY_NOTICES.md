@@ -13,7 +13,7 @@
 
 第三方原审稿组件来源供识别：[patent-review-kit](https://github.com/KrisMiao97/patent-review-kit)。未将该仓库源码或文档复制入本合集。PatSeek服务和客户端按[服务方](https://patseek.cn)实际提供的授权和接口配置，不能把原作者安装过客户端视为下载者已经获得分发或使用许可。
 
-`patent-disclosure-skill`中已有前端vendor保留其随文件声明的许可证与署名，包括Mermaid及其捆绑依赖、Three.js。Mermaid 11.4.1的MIT全文及内嵌声明涉及的DOMPurify双重许可、js-yaml、Lodash、Cytoscape许可全文放在`skills/patent-disclosure-skill/skills/patent-disclosure/tools/vendor/licenses/`，来源记录见该目录的`SOURCES.json`；原JS尾部版权声明保留。Three.js的完整许可随其原vendor文件保留。其他公开Python依赖按requirements文件由使用者安装，本合集不复制其运行环境。LibreOffice、Poppler、Fusion和其他CAD应用、浏览器、连接器及账号不随包分发。
+`patent-disclosure-skill`中已有前端vendor保留其随文件声明的许可证与署名，包括Mermaid及其捆绑依赖、Three.js。Mermaid 11.4.1的MIT全文及内嵌声明涉及的DOMPurify双重许可、js-yaml、Lodash、Cytoscape许可全文放在`skills/patent-disclosure-skill/skills/patent-disclosure/tools/vendor/licenses/`，来源记录见该目录的`SOURCES.json`；原JS尾部版权声明保留。这里的`skills/`路径相对于完整插件根目录或离线整包根目录；在源码仓库中前缀为`plugins/mechanical-patent-workflow/`。Three.js的完整许可随其原vendor文件保留。其他公开Python依赖按requirements文件由使用者安装，本合集不复制其运行环境。LibreOffice、Poppler、Fusion和其他CAD应用、浏览器、连接器及账号不随包分发。
 
 官方缓存Word材料存在禁止第三方分发条款，因此没有复制；官方PDF缓存和其他未明确许可的本机组件也没有直接复制。这里的独立辅助版本只实现其文档列明的通用功能，不能当作官方产品或商业服务的再发布。
 

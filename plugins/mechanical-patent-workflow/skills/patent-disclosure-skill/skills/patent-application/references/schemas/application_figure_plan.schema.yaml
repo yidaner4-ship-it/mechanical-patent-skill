@@ -1,0 +1,34 @@
+# ApplicationFigurePlan — 申请附图图型（按权要语言选定）
+
+落盘：申请产出 `figures/figure_plan.yaml`（不要覆盖交底目录的 `figure_plan.yaml`）。
+
+```yaml
+$schema: application_figure_plan
+version: 1
+patent_type: invention   # invention | utility_model
+subject_kind: mechanical_product  # mechanical_product | method | software_system | mixed | unknown
+figures:
+  - fig: 1
+    kind: lineart        # 见下方
+    reason: "机械产品核心构造；继承核定结构视图"
+    covers: []           # 可见模块名或 parts.id
+    source: claim_language  # claim_language | disclosure | pending
+    path: ""             # 交底线稿或点名图；可空
+```
+
+## `kind`
+
+| kind | 何时选 | 出图 |
+|------|--------|------|
+| `flowchart` | 独权有「步骤一…」或方法步骤 | `render_invention_figures.py` |
+| `block_diagram` | 已确认的软件系统组成；不能仅凭“装置”“模块”词面选择 | 同上 |
+| `section` | 权要写到内部、腔体、剖视 | 交底 `relates_to: section_of` 线稿升格；没有则 `pending` |
+| `exploded` | 权要写到拆装、套设、分解 | 交底 `exploded_of` 线稿升格；没有则 `pending` |
+| `multi_state` | 权要写了第一/第二状态、锁定/触发 | 交底多状态图或 `pending` |
+| `lineart` | 机械发明或实用新型的已核定结构图 | 复用同源CAD／可信原图处理后的图稿；必要时用 `compose_application_figure.py` |
+| `source_image` | 用户点名或交底已入文的场景图 | 原图入文 |
+
+`covers`：该图应能看见的件号或模块名。框图填模块名，结构图填 `parts.id`。  
+`source: pending`：权要需要这张图，但交底没有可升格线稿 → 写入问题清单，不要空画内部。
+
+规划调用传入已核定的 `--type` 和 `--subject-kind`。机械产品继承现有结构图计划；缺少图稿时生成 `pending` 记录，不从文字编造轮廓。`unknown` 不默认流程图／框图，空图计划应报告对象待确认及附图未完成。规划工具只给出候选视图，实际图号仍按机械附图规范以具体实施方式首次实质引用顺序核定。

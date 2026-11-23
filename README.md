@@ -1,109 +1,72 @@
-# 机械专利全流程技能包
+# 机械专利全流程插件
 
-**[⬇ 一键下载全部流程技能（ZIP）](https://github.com/yidaner4-ship-it/mechanical-patent-skill/raw/refs/heads/main/downloads/mechanical-patent-toolkit-20261123.zip)**
+一次安装建模、交底、申请撰写、CAD附图、检索、独立质检、Word/PDF和Excel辅助技能。**完整11个根技能现在随同一个 `mechanical-patent-workflow` 插件发布并统一更新。**
 
-覆盖中国机械结构类发明、实用新型案件从建模、交底、申请撰写、附图、定稿检索、独立质检到清洁完稿的技能与公开辅助代码。解压上面的整包后，进入同时含 `install.py` 和 `skills/` 的目录，即可统一安装。
+## 安装一次，之后统一更新
 
-这是**技能文件整包下载**：Fusion、Python依赖、Office/PDF渲染程序，以及需要账号的检索服务，仍需由使用者在自己的电脑配置。下载包不包含原电脑的账号、密钥、虚拟环境、客户案卷、生产模型或个人模板。
-
-## 下载和安装
-
-1. 点击上方「一键下载全部流程技能」，解压 ZIP。
-2. 在解压后含 `install.py` 的目录中打开终端，先查看安装计划：
-
-   ```sh
-   python3 install.py --dry-run
-   ```
-
-3. 确认目标位置后安装：
-
-   ```sh
-   python3 install.py
-   ```
-
-Windows 可将 `python3` 换成可用的 Python 3 命令（例如 `py -3`）。安装器只使用 Python 标准库，默认安装到 `$CODEX_HOME/skills`；未设置时使用当前用户的 `.codex/skills`。已有同名技能先备份到安装目录旁的 `skills-backups/`，不修改其他技能，也不复制或覆盖全局 `AGENTS.md`。
-
-详见 [安装、依赖与恢复说明](INSTALL.md)。如需项目专用目录，可用 `--dest` 明确指定。`--only` 仅供已理解跨技能依赖的使用者选择部分根技能。
-
-GitHub 的绿色 **Code → Download ZIP** 下载的是本仓库快照，包含兼容插件和 `downloads/` 中的整包；它与上方直接下载的全流程 ZIP 层级不同。需要全流程时，优先点击上方直链。
-
-## 包内技能与流程
-
-| 阶段 | 根技能／入口 | 用途 |
-| --- | --- | --- |
-| 案件接入、交底与申请 | `patent-disclosure-skill` | 总入口，内含 `patent-disclosure`、`patent-application`、可选 `patent-docket` 等子技能 |
-| 建模／改模 | `fusion-production-modeling` | 逐件制造、真实安装接口、装拆关系、工况、干涉和STEP复验 |
-| 专利附图 | `mechanical-patent-drawings` | 从可信几何取图、剖视／爆炸、标号、短S引线、图文同步与模板套版 |
-| 定稿检索与评价 | `shensheng-patent-workbench` | 按当前权项组织实际检索、核验证据及记录新颖性／创造性评价 |
-| 检索入口 | `patent-search`、`patseek-patent-search` | 公开检索辅助及外部服务适配，按实际配置选择 |
-| 独立质检 | `shensheng-patent-qa`、`patent-draft-review` | 冻结实际稿件、独立审阅、逐处标号／逐根引线、整改和复核 |
-| Word／PDF成品 | `documents`、`pdf` | 独立公开辅助版本，处理套版、真实修订、渲染、隐私清理及成品检查 |
-| Excel检索报告 | `spreadsheets` | 独立公开辅助版本，处理候选表、公式与格式及隐私检查；基于公开的openpyxl依赖 |
-
-```mermaid
-flowchart TD
-    A[材料与案件接入] --> B[建模或核验已有模型]
-    B --> C[挖掘专利点与形成交底]
-    C --> D[申请正文撰写]
-    C --> E[CAD附图与标记]
-    D <--> E
-    D --> F[实际Word与附图PDF]
-    E --> F
-    F --> G[定稿检索或必要补检]
-    G --> H[独立质检]
-    H --> I{整改及复核}
-    I -->|结构问题| B
-    I -->|权项或图文问题| D
-    I -->|完成适用检查| J[同步副本、渲染、隐私清理与完稿]
-```
-
-已有有效模型或交底时从相应阶段接入；正文与附图联动。交底成稿也按适用范围质检。`patent-docket` 只在明确要求「交底申请一起做」「一条龙」「会稿」时调度，不强制所有案件进入案卷流程。
-
-## 保留的撰写和附图要求
-
-- 权1简洁且适度上位概括，保留解决核心问题的必要部件及配合；驱动、导向、紧固、方向和尺寸逐项判断必要性，具体后备结构按本案安排到从权或实施方式。
-- 内容按权项顺序展开，各结构就近说明直接效果；实施方式从整机到局部，再以装配或工作过程串起关系。
-- 附图来源和结构依据可追溯；一图一页、图体水平及垂直居中、图号放页脚，按具体实施方式首次实质引用顺序编号，用户锁定图号时记录例外。
-- 短S及主要件箭头、字号、线宽等依包内现行规则核验；公开包只保留可公开的复现样例，不附带客户案件原图。脚本和像素检查不能代替真实落点、同源几何及最终图幅的逐根目视验收。
-- 成稿和实质改稿接入适用的检索／补检、独立质检及最终清理。关键事实、图页或必要核读未完成时交付阶段成果并说明范围，不因列入问题单而宣称正式定稿。
-
-## 公开版本与外部依赖
-
-整包包含11个根技能目录。`documents`、`pdf`、`spreadsheets`以及部分审稿／检索适配入口采用**独立公开实现**，不包含相应官方缓存、第三方技能源码或商业客户端，也不声称与原环境组件完全相同。第三方开放组件的原许可证和必要署名随其文件保留；各组件的来源与分发范围以包内说明为准。
-
-- 机械建模需要使用者可用的 Fusion 或其他 CAD 应用／接口；应用和商业许可不随包安装。
-- Word／PDF渲染需要本地可用的 LibreOffice、Poppler 等程序，Python辅助库按所用子技能的要求安装。
-- 连接检索服务需要下载者自己的服务连接、客户端和凭据。PatSeek公开版只提供外部客户端适配；未配置时明确不可用，不静默代搜或继承任何原账号费用授权。
-- 基础文件安装器可跨平台使用。当前工作台的安全CLI依赖 macOS Keychain 和 POSIX `fcntl` 锁；Windows 应使用可用的服务连接或自行适配该CLI，不能据此认定商业检索在Windows下载后即可运行。
-
-## 使用示例
-
-```text
-根据我提供的交底和有效模型，完成这件机械实用新型的五书。
-沿用我的Word模板，独权保留必要结构及配合，正文与附图同步。
-完成定稿检索、独立质检、整改复核和交付副本隐私清理；说明未完成项。
-```
-
-```text
-交底和申请一起做。先核对本案有效材料与模型版本，
-缺关键技术事实列清单，不编造；阶段成果与正式定稿分开说明。
-```
-
-## 原有插件的兼容入口
-
-本仓库原有 `plugins/` 和市场目录继续保留。原有「机械专利撰写（含独立质检）」插件及独立质检插件可按原方式安装；它们的安装范围由各自插件清单决定，**不等同于安装上方全流程 ZIP 的全部根技能**。
-
-以下为仓库现有插件的兼容安装方式，需客户端本身支持对应命令：
+在支持插件市场的Codex CLI中执行：
 
 ```sh
 codex plugin marketplace add yidaner4-ship-it/mechanical-patent-skill --ref main
-codex plugin add mechanical-patent-drafting@mechanical-patent-toolkit
+codex plugin add mechanical-patent-workflow@mechanical-patent-toolkit
 ```
 
-已有该市场来源时，可按客户端支持的方式刷新：
+支持本地市场的桌面客户端可在添加此GitHub市场后选择「机械专利全流程（建模·撰写·质检）」安装。安装后按客户端提示开启新对话或重载。仓库公开可读取，不要求下载者拥有本仓库写权限。
+
+以后发布者将新版插件推送到同一GitHub仓库的 `main` 分支，使用者只需更新这个市场，无需逐个下载11个技能：
 
 ```sh
 codex plugin marketplace upgrade mechanical-patent-toolkit
 ```
 
-旧插件的默认质检入口见 [随插件质检技能](https://github.com/yidaner4-ship-it/mechanical-patent-skill/blob/main/plugins/mechanical-patent-drafting/skills/shensheng-patent-qa/SKILL.md)。使用全流程技能时，建议从上方整包安装，按客户端能力避免同时启用重复命名的技能。仓库发布不会自动替其他电脑安装或更新技能；更新后按客户端提示重载或开启新对话。
+更新命令会刷新Git来源并更新已安装插件。**这不等于所有设备实时自动推送。**手动安装者按客户端刷新；工作区管理员按下节配置GitHub同步，才有工作区的自动每日同步。固定到旧commit或使用ZIP副本不会跟随main。仅修改发布者电脑中的私有技能，也不会自行发布到GitHub。
+
+## 工作区自动同步
+
+工作区管理员在管理控制台的Plugins中选择Import marketplace，Source填写：
+
+```text
+https://github.com/yidaner4-ship-it/mechanical-patent-skill
+```
+
+Path留空，Branch填写 `main` 或采用默认分支，不固定旧commit。导入后配置插件对角色的可用／安装策略。新市场默认每日同步，也可在Marketplaces选择Sync now立即同步；仍受GitHub访问和工作区策略限制。[官方GitHub导入与同步说明](https://help.openai.com/en/articles/20001504-importing-and-syncing-plugin-marketplaces-from-github)
+
+此仓库提供GitHub插件市场分发，并不表示已经上架OpenAI通用公共插件目录。所需外部应用与服务仍由每位使用者配置和授权。
+
+## 一个插件中的11个根技能
+
+| 阶段 | 技能 | 作用 |
+| --- | --- | --- |
+| 案件接入与撰写 | `patent-disclosure-skill` | 内含交底、申请、可选案卷会稿等9个子入口 |
+| 建模与改模 | `fusion-production-modeling` | 制造装配细节、工况、干涉、原生模型及STEP复验 |
+| CAD附图 | `mechanical-patent-drawings` | 投影、剖视、爆炸、标号、短S引线与图文同步 |
+| 定稿检索 | `shensheng-patent-workbench` | 当前权项的实际检索、证据及两性评价 |
+| 检索来源 | `patent-search`、`patseek-patent-search` | 公开源及需自行配置的商业客户端适配 |
+| 独立质检 | `shensheng-patent-qa`、`patent-draft-review` | 方案、支持、形式、逐处标号及逐根引线审阅整改 |
+| 文件成品 | `documents`、`pdf`、`spreadsheets` | Word/PDF/Excel的公开辅助实现、渲染和隐私核验 |
+
+所有根技能保留同级关系，总包的9个子技能保留原层级。发布源码唯一维护在 [`plugins/mechanical-patent-workflow/`](plugins/mechanical-patent-workflow/)，市场直接安装这份源码，不从另一个ZIP解包加载。
+
+## 保留的机械撰写要求
+
+- 权1简洁、概括有据，保留核心部件和必要配合；具体驱动、导向、紧固、方向和尺寸逐项判断必要性。
+- 内容依权项顺序展开，各结构就近说明直接效果；实施方式由整机到局部，再以装配或工作过程串联。
+- 真实CAD／可信原图优先，一图一页、图体居中、图号置页脚，按具体实施方式首次实质引用排序；固定图号按本案要求处理。
+- 保留现行短S、字号、线宽和主要件箭头要求；公开图例仅为同参数通用曲线，不附客户原图。工具成功不能替代几何核验与逐根目视。
+- 成稿和实质改稿接入适用检索／补检、独立质检及交付清理；缺关键事实或必要核读时明确阶段成果与未完成范围。
+
+## 从旧版迁移与离线使用
+
+原有撰写插件、独立质检插件和旧日期ZIP继续保留。它们不会自动变成完整11技能插件。首次迁移请安装新的 `mechanical-patent-workflow`；确认可用后，按需停用旧插件或移出同名手动技能，避免重复入口。不要删除客户案件、个人模板或原有备份。
+
+- [最新可导入插件ZIP](https://github.com/yidaner4-ship-it/mechanical-patent-skill/raw/refs/heads/main/downloads/mechanical-patent-workflow-latest.zip)：用于支持本地ZIP导入的客户端；离线副本本身不自动订阅更新。
+- [最新离线技能整包](https://github.com/yidaner4-ship-it/mechanical-patent-skill/raw/refs/heads/main/downloads/mechanical-patent-toolkit-latest.zip)：解压后可用install.py；这种复制安装仍需手动下载新版。
+- [安装、更新及依赖说明](INSTALL.md)
+- [维护者发布步骤](MAINTAINER.md)
+- [组件分发范围](THIRD_PARTY_NOTICES.md)
+
+## 能力与依赖边界
+
+本插件分发技能规则与公开工具，不附Fusion、Office、LibreOffice、Poppler、原电脑的虚拟环境或账号。Python依赖、商业检索客户端、MCP／服务连接、字体及生产模型按实际任务配置。可写环境、用户配置、模板和案件数据放在插件缓存外，避免升级替换；插件更新不会替他人配置或授权商业账号。
+
+Word/PDF/Excel以及部分审稿、检索入口为独立公开兼容实现，不复制受限官方缓存或未许可第三方原包，也不声称功能完全相同。保留开放组件的许可与署名，详见THIRD_PARTY_NOTICES.md。

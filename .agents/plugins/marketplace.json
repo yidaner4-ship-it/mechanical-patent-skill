@@ -1,9 +1,21 @@
 {
   "name": "mechanical-patent-toolkit",
   "interface": {
-    "displayName": "机械专利撰写与质检"
+    "displayName": "机械专利全流程与独立质检"
   },
   "plugins": [
+    {
+      "name": "mechanical-patent-workflow",
+      "source": {
+        "source": "local",
+        "path": "./plugins/mechanical-patent-workflow"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_USE"
+      },
+      "category": "Productivity"
+    },
     {
       "name": "mechanical-patent-drafting",
       "source": {

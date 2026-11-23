@@ -1,0 +1,1 @@
+# Python standard library only. LibreOffice and Poppler are separate local tools.

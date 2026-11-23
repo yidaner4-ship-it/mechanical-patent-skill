@@ -1,0 +1,34 @@
+# StructureSchema — 机械产品结构事实合同
+
+用于机械产品发明与实用新型，类型独立核定；图形入文以同目录 figure_plan 为准。
+
+```yaml
+$schema: structure.schema
+version: 1
+mode: disclosure
+patent_type: invention       # 沿用核定类型 invention | utility_model
+subject_kind: mechanical_product
+source_images: []
+parts:
+  - id: "1"
+    name: 壳体
+    shape: 壳状
+    material_hint: unknown
+features:
+  - id: "11"               # 本案标号，与parts共享唯一空间，不自创无依据特征
+    name: 导向槽
+    parent_part_id: "1"
+    kind: slot              # hole | slot | rib | tooth | face | opening | gap | flow_path | functional_region等
+    source: 同源CAD或已核原文/原图的具体位置
+    visible_in: [1]
+relations: []               # from/to/type/where/seen_in；可引用已登记部件或子特征
+spatial: []
+function_of_structure: []
+delta_hypothesis: []
+uncertain: []               # 未能核实的对象不能同时进入确定parts/features
+annotations: []             # 剖切符号/观察方向/对位虚线等，不是零件或子特征
+```
+
+物理部件的零件层与标引子特征分开维护；孔槽、筋齿等可有子特征号而不拆成独立零件。沿用本案复合号体系；id/name全案一致，同一实体跨图同号。features必须具有真实母件和来源，不能用新增字段编造结构。
+
+必填parts（有据部件至少1，或在uncertain说明无法识别）、relations或明确空数组及说明、uncertain。features/annotations可空。旧仅有parts的合同继续兼容。reference_number仅作旧数据别名；与id同时存在时须相同，禁止一套图两号。

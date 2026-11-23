@@ -1,0 +1,33 @@
+# StructureCalloutAnchors — 已核真实锚点与标引合同
+# 画法/参数唯一依据：mechanical-patent-drawings/references/cad-figures.md及approved-leader-style.json。
+version: 1
+coordinate_system: normalized
+structure_ref: structure_schema.yaml
+views:
+  - view_name: 总装立体图
+    base_svg_path: lineart_assist/总装立体图_composed.svg
+    output_svg_path: lineart_assist/总装立体图_callouts.svg
+    paper_width_mm: 160       # 最终含标引/留白图体宽；必须匹配Word/PDF实际嵌入尺寸
+    callouts:
+      - id: "1"             # 与parts/features共享编号；同图重复实指可分别记录
+        name: 壳体
+        parent_part_id: "1"
+        target_kind: face    # part | edge | face | hole | slot | gap | flow_path
+        anchor: [0.62, 0.72]
+        label: [0.78, 0.68]
+        label_placement: external  # external | internal；图内须有可辨认留白
+        marker_type: primary_arrow # ordinary | primary_arrow
+        arrow_axis: [1, 0]  # 可选：从真实箭尖指向箭底的几何轴；不填时自动与S首切线顺接
+        length_exception_reason: "" # 确需偏离名义长度时记录具体原因
+        anchor_confirmed: true
+        confidence: 0.95
+        evidence: 当前同源投影中可核实的壳体实体面中部
+
+# anchor按未加边留白的源画布归一化到0..1；label允许-0.08..1.08，脚本加留白。
+# id/name对齐parts/features，target_kind与实际对象一致，不以最近墨线替代几何归属。
+# 孔槽指向真实边/面；宽面主要件按规则可落面中；gap指向真实空间。
+# 默认不自动移动锚点或图内标引。可选排布只给图外数字候选，需核实后回写。
+# 实体/孔槽/间隙的正确性须人工看图，confidence及数据校验都不是目视验收证明。
+# 未填paper_width_mm仍可输出预览，但状态为preview_missing_paper_size，不能宣称纸面样式已合格。
+# 样式从唯一JSON读取；最终页须复核短S长度及顺滑、三角箭身、末端/字框和邻线净距。
+# 长度按约6.3mm起排，确需延长逐处记录原因，不能把此值作为全部引线等长硬门槛。

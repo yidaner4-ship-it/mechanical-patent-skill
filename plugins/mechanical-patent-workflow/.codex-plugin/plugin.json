@@ -1,0 +1,25 @@
+{
+  "name": "mechanical-patent-workflow",
+  "version": "1.0.0",
+  "description": "机械专利全流程：制造装配级建模、交底、申请正文、CAD附图、检索、独立质检与清洁完稿。",
+  "author": {
+    "name": "申晟知识产权"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "机械专利全流程（建模·撰写·质检）",
+    "shortDescription": "一次安装建模、交底、申请、附图、检索、质检及成品辅助技能",
+    "longDescription": "申晟机械专利全流程公开插件，包含11个根技能。保留简洁独权、图文联动、短S引线、独立质检及交付隐私要求。软件、服务账号与商业客户端由使用者配置。",
+    "developerName": "申晟知识产权",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/yidaner4-ship-it/mechanical-patent-skill",
+    "defaultPrompt": [
+      "根据我提供的材料和模型完成机械专利五书，并做独立质检与成品复核。",
+      "沿用已确认底稿，只修改指定权项与相关附图，并检查受影响内容。"
+    ]
+  }
+}

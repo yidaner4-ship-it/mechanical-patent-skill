@@ -1,0 +1,47 @@
+#!/bin/sh
+set -eu
+
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+
+find_python() {
+  skill_runtime="${SCRIPT_DIR}/../.runtime/bin/python3"
+  if [ -x "${skill_runtime}" ]; then
+    printf '%s\n' "${skill_runtime}"
+    return 0
+  fi
+  if [ -n "${CODEX_WORKSPACE_PYTHON:-}" ] && [ -x "${CODEX_WORKSPACE_PYTHON}" ]; then
+    printf '%s\n' "${CODEX_WORKSPACE_PYTHON}"
+    return 0
+  fi
+  bundled="${HOME}/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3"
+  if [ -x "${bundled}" ]; then
+    printf '%s\n' "${bundled}"
+    return 0
+  fi
+  candidate=$(command -v python3 || true)
+  if [ -n "${candidate}" ] && "${candidate}" -c 'import sys; raise SystemExit(sys.version_info < (3, 11))'; then
+    printf '%s\n' "${candidate}"
+    return 0
+  fi
+  return 1
+}
+
+PYTHON=$(find_python) || {
+  printf '%s\n' '错误：需要 Python 3.11+；请在 Codex 中加载 workspace dependencies。' >&2
+  exit 2
+}
+
+command_name=${1:-}
+case "${command_name}" in
+  keychain)
+    shift
+    exec "${PYTHON}" "${SCRIPT_DIR}/patseek_keychain.py" "$@"
+    ;;
+  patseek)
+    shift
+    exec "${PYTHON}" "${SCRIPT_DIR}/patseek_secure.py" "$@"
+    ;;
+  *)
+    exec "${PYTHON}" "${SCRIPT_DIR}/patent_workbench.py" "$@"
+    ;;
+esac

@@ -1,0 +1,57 @@
+{
+  "schema_version": 2,
+  "reference": "通用短S复现样例；仅保留现行纸面样式参数，不含原案件图页",
+  "paper_reference": "A4 PDF at 100 percent scale; lengths are on-paper, not CAD model lengths",
+  "marker_font": "Times-Roman",
+  "marker_font_size_pt": 12,
+  "leader_stroke_width_pt": 0.52,
+  "primary_arrow_length_pt": 5.6,
+  "primary_arrow_base_width_pt": 3.6,
+  "leader_shape": "two smooth bends in opposite directions; compact as figure 8 reference 41; one inflection, no hook or repeated waves",
+  "length_metric": "S body arc length from geometry contact or arrow base midpoint to text end; triangle excluded",
+  "approved_pdf": "approved-leader-fig8-41.pdf",
+  "approved_pdf_sha256": "311cadaf792723ed920c9b7f2bf3be827a727f82e17375cf5d8b38089652b46f",
+  "preferred_exemplar": {
+    "figure": 8,
+    "reference": "41",
+    "arrow": false,
+    "s_body_arc_length_mm": 6.311894430073415,
+    "chord_length_mm": 6.142446772379834,
+    "s_body_arc_length_per_12pt_font_height": 1.4909986842693106,
+    "lobe_offsets_mm": [
+      0.3091441018079603,
+      0.3091441018079604
+    ],
+    "minimum_radius_mm": 2.055461867223641,
+    "inflection_count": 1,
+    "normalized_chord_frame_control_points": [
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.2918967702440517,
+        0.17434527673869238
+      ],
+      [
+        0.7081032297559481,
+        -0.1743452767386924
+      ],
+      [
+        0.9999999999999998,
+        -1.0202110682697604e-16
+      ]
+    ],
+    "preview_png": "approved-leader-fig8-41.png",
+    "scope": "Generic reconstruction of the retained numerical style; no client case geometry."
+  },
+  "application_policy": {
+    "default": "Place both ordinary leaders and S bodies of primary-arrow leaders near the 6.3 mm nominal length and this curve shape at final output size.",
+    "orientation": "Translate, rotate or mirror the normalized exemplar; retain relative smooth opposite bends. Segment count or curve representation is not prescribed.",
+    "primary_arrow": "Keep previously approved triangle dimensions and geometry-dependent placement; attach the same compact S body. Do not retain the historical 11.55 mm minimum for its S body.",
+    "clearance": "First adjust label placement, view framing, assembly spacing or visible feature anchor. Preserve true target, outer text clearance and neighbor separation.",
+    "exception": "If geometry truly requires a longer leader, keep the compact smooth curve character and record figure, mark and reason. Do not treat the historical 26 mm extent as the new default tolerance.",
+    "scope": "Future patent and disclosure drawings within this skill, across model switches. No bulk revision of the existing case was requested in this turn."
+  },
+  "historical_reference_note": "Earlier R3 whole-case ranges and medians are preserved as history only. Latest figure-8 mark-41 exemplar takes priority for future lengths and shape."
+}

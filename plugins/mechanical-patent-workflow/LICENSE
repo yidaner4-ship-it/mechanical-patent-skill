@@ -1,0 +1,10 @@
+This collection preserves the licenses of its individual components.
+
+See THIRD_PARTY_NOTICES.md and each component's LICENSE or LICENSE.txt.
+No blanket license is granted over external proprietary applications,
+commercial services, third-party clients not included in the archive,
+or materials whose owners have not granted redistribution rights.
+
+The MIT notices for the independently authored public helper programs
+apply only to those helper programs and their independently authored
+documentation, not to unrelated components.

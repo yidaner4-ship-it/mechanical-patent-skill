@@ -1,100 +1,63 @@
-# 安装、依赖与恢复
+# 安装与统一更新
 
-## 先下载正确的包
+## 推荐：安装完整插件
 
-点击 **[一键下载全部流程技能](https://github.com/yidaner4-ship-it/mechanical-patent-skill/raw/refs/heads/main/downloads/mechanical-patent-toolkit-20261123.zip)**，解压后进入同时包含以下内容的目录：
+需要支持插件市场的Codex CLI或相应桌面客户端。在CLI执行：
 
-```text
-install.py
-skills/
-  fusion-production-modeling/
-  patent-disclosure-skill/
-    skills/patent-disclosure/
-    skills/patent-application/
-    skills/patent-docket/
-  mechanical-patent-drawings/
-  shensheng-patent-workbench/
-  shensheng-patent-qa/
-  patent-draft-review/
-  patent-search/
-  patseek-patent-search/
-  documents/
-  pdf/
-  spreadsheets/
+```sh
+codex plugin marketplace add yidaner4-ship-it/mechanical-patent-skill --ref main
+codex plugin add mechanical-patent-workflow@mechanical-patent-toolkit
 ```
 
-根技能文件夹须保留同级关系，`patent-disclosure-skill` 内部子技能也须保留原层级。不要仅提取单个 `SKILL.md`。GitHub **Code → Download ZIP** 是仓库快照；其中的 `downloads/` 整包还需要再解压，才能取得上述安装源。
+默认市场名为 `mechanical-patent-toolkit`。完整插件名为 `mechanical-patent-workflow`，界面显示「机械专利全流程（建模·撰写·质检）」。它一次提供11个根技能和总包内9个子入口。安装后按客户端提示重载或开启新对话。
 
-## 安装文件
+不要只稀疏拉取`.agents/plugins`：市场条目还需要同仓库完整的`plugins/mechanical-patent-workflow`目录。上述推荐命令不设置稀疏过滤。
 
-安装器仅使用 Python 3 标准库，支持 Python 3.10 及以上。选择本机实际可用的 Python 命令；下例使用 `python3`，Windows可用 `py -3`。
+## 更新
 
-先检查计划，不创建任何目录或文件：
+```sh
+codex plugin marketplace upgrade mechanical-patent-toolkit
+```
+
+Git来源跟踪main时，此命令刷新源并更新已安装的插件缓存。保持同一插件名和市场名即可续接更新，不用每次重新添加11个技能。发布者须真正更新GitHub插件目录和版本；只改本机文件不能传播。固定旧commit、复制到手动skills目录或离线ZIP不会自行更新。
+
+工作区管理员可按[官方说明](https://help.openai.com/en/articles/20001504-importing-and-syncing-plugin-marketplaces-from-github)导入同一仓库、跟踪main并配置访问策略。新市场默认每日同步，可用Sync now立即刷新。这是工作区同步，不是对任何个人设备的实时强制推送；无管理员权限的使用者按其客户端支持的方式更新。
+
+升级会替换插件缓存。个人偏好可放本地AGENTS或独立配置，模板、生产模型、案件、凭据及运行环境必须放缓存外，不能依赖手工修改已安装插件保存长期内容。商业服务配置不会因插件发布自动完成。
+
+## 从旧安装迁移
+
+旧`mechanical-patent-drafting`及独立`shensheng-patent-qa`插件继续供兼容使用，安装范围保持原样。需要完整流程时安装新插件。先确认新插件可用，再按需停用旧插件或备份移出手动安装的同名技能；不要自动删除其他技能、全局AGENTS、用户模板和案件。
+
+## 离线与源码副本
+
+[插件ZIP](https://github.com/yidaner4-ship-it/mechanical-patent-skill/raw/refs/heads/main/downloads/mechanical-patent-workflow-latest.zip)的根目录为plugin.json、.codex-plugin/及skills/，用于支持导入的客户端。导入的ZIP本身是版本快照。
+
+[离线技能整包](https://github.com/yidaner4-ship-it/mechanical-patent-skill/raw/refs/heads/main/downloads/mechanical-patent-toolkit-latest.zip)解压后可执行：
 
 ```sh
 python3 install.py --dry-run
-```
-
-安装全部随包根技能：
-
-```sh
 python3 install.py
 ```
 
-默认目标为环境变量 `CODEX_HOME` 指定目录下的 `skills/`；未设置时为当前用户的 `.codex/skills/`。需要其他工具或项目目录时显式指定：
+这种方式只复制技能，保留已有目录的备份，不提供市场自动更新。Windows可用`py -3`代替python3。安装器要求Python3.10+；默认目标为`$CODEX_HOME/skills`，未设置时为当前用户的`.codex/skills`。支持`--dest`及`--only`；部分安装不自动补齐跨技能依赖。
 
-```sh
-python3 install.py --dest ./project-skills --dry-run
-python3 install.py --dest ./project-skills
-```
+源码检出目录中的install.py从`plugins/mechanical-patent-workflow/skills`读取；离线整包从根skills读取。它不安装依赖、不登录账号、不改全局AGENTS。已有同名目录先备份，失败则回滚；恢复前确认无并行安装进程。
 
-`--dest` 必须是工具实际支持的技能目录；安装器不会替使用者配置其他产品的技能发现机制。安装后按客户端提示重载技能或在新对话中使用。
+## 外部运行环境
 
-只安装部分根技能可用：
+- 建模需使用者自己的Fusion／其他CAD、合法许可及实际应用接口；不随插件分发或自动配置。
+- Word/PDF渲染需本地LibreOffice及Poppler等可用程序和字体；公开Python库按所用子技能requirements安装到独立环境。
+- Excel辅助使用openpyxl保留数据、格式及公式；公式重算需可用的表格应用，不能把写入公式等同于已计算。
+- 检索服务需要自己的授权、账号、合法客户端与费用范围。PatSeek工作台安全CLI使用macOS Keychain和POSIX文件锁，Windows需相应服务连接或另行适配；不能承诺所有平台开箱运行全部商业服务。
+- 独立质检需要真实可读文件、适用图页及未参与起草的审阅者；缺少条件如实报告，不把扫描通过当成全稿通过。
+- 可写数据和依赖放插件缓存之外，具体环境变量和路径见对应技能说明；升级只更新受版本管理的程序和规则。
 
-```sh
-python3 install.py --only fusion-production-modeling
-```
+CAD环境可通过`PATENT_SKILL_CAD_VENV`指定现有环境的绝对路径，或用`PATENT_TOOLKIT_DATA_HOME`指定持久数据根，CAD工具会使用其中的`cad-env/`。未指定时依次采用系统用户数据目录，最终回退至`~/.local/share/mechanical-patent-workflow/`。PatSeek需由使用者显式设置`PATSEEK_VENDOR_ROOT`和根内的`PATSEEK_CLIENT_PATH`，仍须通过权限、接口与安全包装检查；不会自动信任或分发第三方代码。详见对应技能INSTALL。
 
-部分安装不会自动补齐跨技能依赖。完整撰写与质检建议整包安装；只需建模时可选择建模技能。`--only patent-disclosure-skill` 会保留其全部嵌套子技能，不会将子技能散装到根目录。
+## 成品工具示例
 
-安装器不执行 `pip`，不安装原生应用、不连接检索账号、不创建后台任务、不改写全局 `AGENTS.md`，也不移除未选择的其他技能。源目录、目标目录不能重叠；包内符号链接、异常目标和不安全的技能名会被拒绝。
-
-## 更新与恢复
-
-重复运行安装器时，同名旧技能先移入目标安装目录旁的 `<安装目录名>-backups/` 独立备份目录，再替换为已暂存的新副本。安装结果会显示实际备份位置，备份目录中的 `BACKUP.json` 列出被替换的根技能。
-
-复制和验证先在暂存目录完成，单个目录通过同一文件系统内重命名替换。中途提交失败时，安装器会移除本次已安装目录并恢复本次旧目录；保留的其他技能不变。
-
-手动恢复时，先关闭正在使用这些文件的任务，将当前需要恢复的技能目录移到其他位置，再把备份中的同名技能目录复制回原安装位置。只恢复实际需要的目录，不用整批覆盖当前用户的其他技能。
-
-如遇安装锁，先确认没有其他安装进程正在运行。确认锁来自已结束的进程后，再移除报错位置中的 `.mechanical-patent-toolkit-install.lock` 并重试；不要在另一安装进程运行时删锁。
-
-## 运行环境分开准备
-
-安装技能文件成功，只表示文件已到位，不表示全部外部能力可用。按本次任务实际需要配置：
-
-| 能力 | 需要配置 | 不随整包复制 |
-| --- | --- | --- |
-| 基础技能安装 | Python 3.10+ | 原电脑Python或虚拟环境 |
-| 交底、申请及格式工具 | 各子技能要求的公开Python依赖，建议隔离环境 | 依赖缓存、历史输出 |
-| Fusion／其他CAD | 可用应用、合法许可及实际可调用的接口 | 应用二进制、登录状态、客户模型 |
-| STEP解析 | 子技能要求的隔离CAD环境，按所选解析器配置 | 原电脑 `cad-env` |
-| Word套版和修订 | 目标用户的有效Word模板；对应公开Python依赖 | 原用户个人／客户模板 |
-| Word／PDF渲染 | LibreOffice或实际可用的渲染能力；Poppler按需配置 | 原系统安装与字体 |
-| Excel检索候选表 | 独立公开 `spreadsheets` 技能及openpyxl；需要重算时使用可用的表格应用 | 原用户工作簿、计算缓存、表格账号 |
-| 独立审阅 | 支持独立审阅者的运行环境，实际可读的文稿和图页 | 原会话、账号与审核日志 |
-| 商业检索 | 下载者自己的服务连接、凭据、可用客户端及费用范围 | 原账户授权、密钥、积分预算 |
-
-各组件的依赖文件以其目录中的说明为准。不要把一个子技能的可选CAD或浏览器依赖全部装进主Python环境。完成后分别测试实际读取、文件生成和渲染；缺少运行能力时记录具体未完成范围，不能以安装成功代替案件验收。
-
-## 公开辅助版本和平台边界
-
-整包中的Word／PDF／Excel辅助技能及部分审稿／检索适配入口为独立公开版本，不包含相应官方缓存、第三方技能源码或商业客户端。按包内各技能说明使用，不将其与原环境功能等同。开放组件的许可证和必要版权声明保持随包。openpyxl可写入和保留公式，本身不会重新计算公式结果；需要计算验收时使用可用的表格应用或明确标记未重算范围。
-
-当前 PatSeek 工作台安全CLI使用 macOS Keychain 与 POSIX `fcntl`。这部分不是Windows开箱即用功能；Windows需要可用的服务连接或自行适配。PatSeek适配入口未配置外部vendor时会明确报告不可用，不会悄悄改用别的检索源或沿用原账号的付费授权。公开检索路线如可用，应作为明确选择使用，并说明实际覆盖。
-
-公开文档辅助工具的典型调用（在整包根目录，示例输出目录应为新目录）：
+在完整插件根目录或离线整包根目录运行，输出位置使用新路径：
 
 ```sh
 python3 skills/documents/render_docx.py SOURCE.docx --output-dir NEW_DIR
@@ -103,16 +66,8 @@ python3 skills/pdf/scripts/render_pdf.py SOURCE.pdf --output-dir NEW_DIR
 python3 skills/pdf/scripts/privacy_scrub.py SOURCE.pdf CLEAN.pdf
 ```
 
-需要保留真实修订时将 `--revisions accept` 改为 `--revisions preserve`；结果仍需在Word核对接受态／拒绝态及最终版式。自动接受仅覆盖工具明确支持的文字／属性修订，遇不支持的结构修订时应在Word中处理后重试，不强制生成貌似清洁的文件。渲染脚本可用 `--libreoffice`、`--pdftoppm` 等参数指定本机程序，具体以各脚本 `--help` 为准。PDF清理使用的公开Python库按 `skills/pdf/requirements.txt` 安装。
+DOCX清理器始终删除批注；preserve只保留文字修订。需要批注交付时不要用它处理该副本，应在Word保留内容、匿名化并复查。自动接受不支持的结构修订时，先在Word正确处理再重试。清理后仍须检查实际内容、接受／拒绝功能、图页及版式。
 
-DOCX清理脚本始终删除批注；`preserve`仅保留文字修订。需交付批注时不要用它处理该副本，应在Word中保留批注内容并匿名化，再完成检查器及实际图文复验。
+## 更新前后检查
 
-## 使用前核验
-
-1. 检查客户端能发现所需技能，内部相对引用和嵌套目录存在。
-2. 用非客户的临时样例验证本轮实际要用的工具：材料接入、图文台账、文件生成、渲染和清理。
-3. 模型复验应采用真实原生模型／STEP及适用工况；演示图不能作为几何证明。
-4. 独立质检读取实际拟交付文件；没有独立执行或实际看图条件时明确未完成范围。
-5. 对最终交付Word、PDF及打包副本执行隐私清理，核对可打开、内容完整、图页和版式一致。需要真实修订时保留其接受／拒绝功能并匿名化；清洁稿按本案要求去除附带批注和修订历史。
-
-仓库更新和ZIP下载均不会自动更新其他电脑。下载新的整包后，重新运行安装器即可更新所选根技能并保留旧副本。
+核对插件名称、版本、11个根技能和所需引用。用非客户夹具验证当前任务需要的读取、出稿、渲染及清理能力。实际案件继续执行模型工况复验、定稿检索、独立质检、Word/PDF逐页核读和所有交付副本的隐私清理，不能以安装或升级成功代替案件验收。

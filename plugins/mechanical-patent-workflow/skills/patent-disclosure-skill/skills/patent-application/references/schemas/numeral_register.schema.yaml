@@ -1,0 +1,30 @@
+# NumeralRegister — 件号 / 图号登记（图 ↔ 权要 ↔ 说明书）
+
+机械产品（发明或实用新型）登记部件及可标引子特征。仅有方法／软件逻辑图时，机械 `parts`可空，登记实际 `figures`。`aliases`为经核定的可选名称数组，不能靠别名掩盖同名异物。
+
+```yaml
+$schema: numeral_register
+version: 1
+parts:
+  - id: "1"              # 与 structure_schema.parts.id 同一套
+    name: ""             # 与 schema 部件名一致
+    aliases: []          # 可选；与同一实体对应的核定简称／具体名称
+    figures: [1]         # 出现的 figure_plan.fig
+    claims: [1]          # 出现的权项编号
+    specification: true  # 说明书是否出现该件名称或（id）
+features:              # 可选；也兼容既有登记表将子特征列于parts
+  - id: "11"           # 与parts共用唯一标号空间
+    name: "定位槽"
+    aliases: []
+    parent_part_id: "1"
+    figures: [1]
+    claims: [2]
+    specification: true
+figures:
+  - fig: 1               # 与 figure_plan 或交底「如图 N」一致
+    title: ""            # 附图说明用的一句
+    kind: lineart        # lineart | mermaid | source_image | photo_clean | other
+    disclosure_only: false  # true=仍是交底原图。外观一律 true（不升格）
+```
+
+`features.id`为主编号；`reference_number`仅用于缺失id的旧数据兼容，两者并存必须一致。子特征母件必须存在；实体零件、孔槽／面／间隙、剖切符号分别管理，不能为画图擅自新增无依据号码。

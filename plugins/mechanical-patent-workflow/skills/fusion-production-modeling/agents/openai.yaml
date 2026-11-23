@@ -1,0 +1,4 @@
+interface:
+  display_name: "Fusion 生产级精细建模"
+  short_description: "逐零件落实制造工艺、紧固装配、公差净空与全行程检查的三维建模"
+  default_prompt: "使用 $fusion-production-modeling 按我的方案建立可制造、可装配的精细三维总装，逐件检查工艺、紧固件及静态和运动干涉，并交付可编辑模型与核查记录。"
