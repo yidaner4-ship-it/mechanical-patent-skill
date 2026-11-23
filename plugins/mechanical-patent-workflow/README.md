@@ -21,7 +21,7 @@ codex plugin marketplace upgrade mechanical-patent-toolkit
 
 `skills/`保留11个根技能的同级关系，`patent-disclosure-skill/skills/`保留子技能层级，不要单独移动某个SKILL.md。根plugin.json为portable入口，.codex-plugin/plugin.json提供兼容声明；两者版本保持一致。
 
-建模由fusion-production-modeling负责；交底和申请由patent-disclosure-skill路由；机械附图负责同源几何、图文及标引；workbench负责实际检索，QA独立审阅并使用公开审稿辅助；documents、pdf和spreadsheets完成相应文件辅助工作。
+建模由fusion-production-modeling负责，核对现实零件形态与规格，落实倒角圆角、圆滑管线及制造装配；交底和申请由patent-disclosure-skill路由；机械附图负责同源几何、图文及标引；workbench负责实际检索，QA独立审阅并使用公开审稿辅助；documents、pdf和spreadsheets完成相应文件辅助工作。
 
 Python依赖、Fusion／CAD、LibreOffice／Poppler、字体及商业检索客户端由使用者配置。可写环境、个人模板、vendor和案件放在插件缓存外，避免更新替换；账号不随插件分发或自动授权。公开兼容入口不冒充受限原组件，见THIRD_PARTY_NOTICES.md和各组件许可。
 
