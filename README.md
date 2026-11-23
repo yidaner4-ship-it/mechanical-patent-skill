@@ -1,72 +1,109 @@
-# 机械专利撰写（含默认独立质检）
+# 机械专利全流程技能包
 
-中国机械结构类发明与实用新型的 Codex 插件。**安装「机械专利撰写」一个插件，即同时取得撰写与独立质检两个技能。** 实际初稿或改稿文件生成后、最终交付前，默认执行质检、核实整改及成品复核，无须另行提出质检要求。用户当次明确限定范围或要求跳过时遵从其要求。
+**[⬇ 一键下载全部流程技能（ZIP）](https://github.com/yidaner4-ship-it/mechanical-patent-skill/raw/refs/heads/main/downloads/mechanical-patent-toolkit-20261123.zip)**
 
-当前撰写插件版本为 **0.2.0**，包内质检技能版本为 **1.2.0**。
+覆盖中国机械结构类发明、实用新型案件从建模、交底、申请撰写、附图、定稿检索、独立质检到清洁完稿的技能与公开辅助代码。解压上面的整包后，进入同时含 `install.py` 和 `skills/` 的目录，即可统一安装。
 
-## 安装与更新
+这是**技能文件整包下载**：Fusion、Python依赖、Office/PDF渲染程序，以及需要账号的检索服务，仍需由使用者在自己的电脑配置。下载包不包含原电脑的账号、密钥、虚拟环境、客户案卷、生产模型或个人模板。
 
-从本 [GitHub 仓库](https://github.com/yidaner4-ship-it/mechanical-patent-skill) 安装。
+## 下载和安装
+
+1. 点击上方「一键下载全部流程技能」，解压 ZIP。
+2. 在解压后含 `install.py` 的目录中打开终端，先查看安装计划：
+
+   ```sh
+   python3 install.py --dry-run
+   ```
+
+3. 确认目标位置后安装：
+
+   ```sh
+   python3 install.py
+   ```
+
+Windows 可将 `python3` 换成可用的 Python 3 命令（例如 `py -3`）。安装器只使用 Python 标准库，默认安装到 `$CODEX_HOME/skills`；未设置时使用当前用户的 `.codex/skills`。已有同名技能先备份到安装目录旁的 `skills-backups/`，不修改其他技能，也不复制或覆盖全局 `AGENTS.md`。
+
+详见 [安装、依赖与恢复说明](INSTALL.md)。如需项目专用目录，可用 `--dest` 明确指定。`--only` 仅供已理解跨技能依赖的使用者选择部分根技能。
+
+GitHub 的绿色 **Code → Download ZIP** 下载的是本仓库快照，包含兼容插件和 `downloads/` 中的整包；它与上方直接下载的全流程 ZIP 层级不同。需要全流程时，优先点击上方直链。
+
+## 包内技能与流程
+
+| 阶段 | 根技能／入口 | 用途 |
+| --- | --- | --- |
+| 案件接入、交底与申请 | `patent-disclosure-skill` | 总入口，内含 `patent-disclosure`、`patent-application`、可选 `patent-docket` 等子技能 |
+| 建模／改模 | `fusion-production-modeling` | 逐件制造、真实安装接口、装拆关系、工况、干涉和STEP复验 |
+| 专利附图 | `mechanical-patent-drawings` | 从可信几何取图、剖视／爆炸、标号、短S引线、图文同步与模板套版 |
+| 定稿检索与评价 | `shensheng-patent-workbench` | 按当前权项组织实际检索、核验证据及记录新颖性／创造性评价 |
+| 检索入口 | `patent-search`、`patseek-patent-search` | 公开检索辅助及外部服务适配，按实际配置选择 |
+| 独立质检 | `shensheng-patent-qa`、`patent-draft-review` | 冻结实际稿件、独立审阅、逐处标号／逐根引线、整改和复核 |
+| Word／PDF成品 | `documents`、`pdf` | 独立公开辅助版本，处理套版、真实修订、渲染、隐私清理及成品检查 |
+| Excel检索报告 | `spreadsheets` | 独立公开辅助版本，处理候选表、公式与格式及隐私检查；基于公开的openpyxl依赖 |
+
+```mermaid
+flowchart TD
+    A[材料与案件接入] --> B[建模或核验已有模型]
+    B --> C[挖掘专利点与形成交底]
+    C --> D[申请正文撰写]
+    C --> E[CAD附图与标记]
+    D <--> E
+    D --> F[实际Word与附图PDF]
+    E --> F
+    F --> G[定稿检索或必要补检]
+    G --> H[独立质检]
+    H --> I{整改及复核}
+    I -->|结构问题| B
+    I -->|权项或图文问题| D
+    I -->|完成适用检查| J[同步副本、渲染、隐私清理与完稿]
+```
+
+已有有效模型或交底时从相应阶段接入；正文与附图联动。交底成稿也按适用范围质检。`patent-docket` 只在明确要求「交底申请一起做」「一条龙」「会稿」时调度，不强制所有案件进入案卷流程。
+
+## 保留的撰写和附图要求
+
+- 权1简洁且适度上位概括，保留解决核心问题的必要部件及配合；驱动、导向、紧固、方向和尺寸逐项判断必要性，具体后备结构按本案安排到从权或实施方式。
+- 内容按权项顺序展开，各结构就近说明直接效果；实施方式从整机到局部，再以装配或工作过程串起关系。
+- 附图来源和结构依据可追溯；一图一页、图体水平及垂直居中、图号放页脚，按具体实施方式首次实质引用顺序编号，用户锁定图号时记录例外。
+- 短S及主要件箭头、字号、线宽等依包内现行规则核验；公开包只保留可公开的复现样例，不附带客户案件原图。脚本和像素检查不能代替真实落点、同源几何及最终图幅的逐根目视验收。
+- 成稿和实质改稿接入适用的检索／补检、独立质检及最终清理。关键事实、图页或必要核读未完成时交付阶段成果并说明范围，不因列入问题单而宣称正式定稿。
+
+## 公开版本与外部依赖
+
+整包包含11个根技能目录。`documents`、`pdf`、`spreadsheets`以及部分审稿／检索适配入口采用**独立公开实现**，不包含相应官方缓存、第三方技能源码或商业客户端，也不声称与原环境组件完全相同。第三方开放组件的原许可证和必要署名随其文件保留；各组件的来源与分发范围以包内说明为准。
+
+- 机械建模需要使用者可用的 Fusion 或其他 CAD 应用／接口；应用和商业许可不随包安装。
+- Word／PDF渲染需要本地可用的 LibreOffice、Poppler 等程序，Python辅助库按所用子技能的要求安装。
+- 连接检索服务需要下载者自己的服务连接、客户端和凭据。PatSeek公开版只提供外部客户端适配；未配置时明确不可用，不静默代搜或继承任何原账号费用授权。
+- 基础文件安装器可跨平台使用。当前工作台的安全CLI依赖 macOS Keychain 和 POSIX `fcntl` 锁；Windows 应使用可用的服务连接或自行适配该CLI，不能据此认定商业检索在Windows下载后即可运行。
+
+## 使用示例
+
+```text
+根据我提供的交底和有效模型，完成这件机械实用新型的五书。
+沿用我的Word模板，独权保留必要结构及配合，正文与附图同步。
+完成定稿检索、独立质检、整改复核和交付副本隐私清理；说明未完成项。
+```
+
+```text
+交底和申请一起做。先核对本案有效材料与模型版本，
+缺关键技术事实列清单，不编造；阶段成果与正式定稿分开说明。
+```
+
+## 原有插件的兼容入口
+
+本仓库原有 `plugins/` 和市场目录继续保留。原有「机械专利撰写（含独立质检）」插件及独立质检插件可按原方式安装；它们的安装范围由各自插件清单决定，**不等同于安装上方全流程 ZIP 的全部根技能**。
+
+以下为仓库现有插件的兼容安装方式，需客户端本身支持对应命令：
 
 ```sh
 codex plugin marketplace add yidaner4-ship-it/mechanical-patent-skill --ref main
 codex plugin add mechanical-patent-drafting@mechanical-patent-toolkit
 ```
 
-支持插件目录的客户端也可从此市场选择「机械专利撰写（含独立质检）」安装。安装包内有两个同级技能：
-
-```text
-plugins/mechanical-patent-drafting/
-├── plugin.json
-└── skills/
-    ├── mechanical-patent-drafting/
-    └── shensheng-patent-qa/
-```
-
-已安装旧版撰写插件的电脑，刷新市场来源以获取新版：
+已有该市场来源时，可按客户端支持的方式刷新：
 
 ```sh
 codex plugin marketplace upgrade mechanical-patent-toolkit
 ```
 
-在新对话中查看更新后的技能，客户端仍持有旧版时按其提示重载。GitHub 发布不会主动改变尚未刷新来源的设备，也不会为未安装插件的设备代为安装。
-
-离线安装时，下载仓库 ZIP，将上述 `skills/` 中的**两个技能文件夹一起复制**到本地 `.agents/skills/`，保留同级关系。仅复制撰写技能会缺少它调用的质检入口。离线 ZIP 是固定版本，更新时需重新取得文件。
-
-原独立「申晟专利独立质检」插件继续供只需审稿的使用者安装，与撰写包内质检保持同版。已安装新版撰写插件的电脑无需重复安装独立质检；此前两个插件都装过的设备可移除独立质检插件，以减少重复入口。
-
-## 默认撰写与质检流程
-
-1. 从用户提供的交底、模型、附图和指定底稿起草或修改，核实核心结构、必要配合及说明书支持，按本案要求控制权项数量和文本范围。
-2. 用指定 Word 模板制作实际文稿及附图，查看实际渲染。
-3. 交付前读取同包 [质检入口](plugins/mechanical-patent-drafting/skills/shensheng-patent-qa/SKILL.md)，冻结拟交付版本与依据，交由未参与本轮起草的独立审阅者检查。
-4. 按每次名称出现核标号，逐图逐根看引线落点，检查权项引用、因果、工况及支持；逐条核实意见，有依据且获授权的问题整改后同步各交付副本。
-5. 复查实际成品、隐私与最终文件摘要值，保存审核记录并说明未核项，再交付。
-
-这是技能工作流指令，不安装后台任务或向外部平台自动上传稿件。未具备独立审阅、实际看图或渲染条件时，完成其他可做项目并明确记录对应未完成范围；扫描器通过不能替代完整质检。
-
-## 随包质检能力与依赖
-
-核心审稿方法、逐处扫描、机械图文复核及报告格式均在安装包内，新电脑无需另装上游技能或联网读取方法。
-
-- [审稿方法与证据](plugins/mechanical-patent-drafting/skills/shensheng-patent-qa/references/review-method.md)：逐项引用路径、先行基础、技术因果、工况和支持。
-- [名称及标号逐处核对](plugins/mechanical-patent-drafting/skills/shensheng-patent-qa/references/component-occurrences.md)：每次名称的段落、字符位置、实有标号、结论及例外依据。同段另一处正确标号不能替代当前检查。
-- [机械图文与真实修订复核](plugins/mechanical-patent-drafting/skills/shensheng-patent-qa/references/mechanical-review.md)：每图每次标号的实体归属、引线、剖切、图文及交付副本一致性。
-- [审核记录格式](plugins/mechanical-patent-drafting/skills/shensheng-patent-qa/references/report-record.md)：覆盖范围、逐处结果、问题证据、整改复核、未核项及最终摘要值。默认输出 Markdown。
-
-随包扫描脚本只需 Python 3 标准库；人工审稿本身不要求安装 Python。Word/PDF 渲染、CAD 查看及独立审阅使用运行环境实际提供的能力；不足处如实列明。新的专利检索及最新法律依据按当轮任务和工具核验。
-
-已有本地 `patent-draft-review` 时，可额外使用其详细参考或兼容的离线 HTML 报告生成器，它不是核心质检的必装条件。该组件单独维护，未复制其代码；来源为 [patent-review-kit v0.6.1 固定提交](https://github.com/KrisMiao97/patent-review-kit/tree/676ae000af132d7db9ba59821d8fcd2234288fdb)。使用前核对完整组件、Python 环境和数据格式；没有该组件时仍按包内格式完成 Markdown 记录。
-
-## 使用示例
-
-```text
-用机械专利撰写技能，根据本地交底和指定模板完成实用新型五书。
-权利要求控制在15项以内。按包内默认流程完成独立质检、核实整改和最终复核后交付。
-```
-
-仅审已有稿件时也可直接调用 `$shensheng-patent-qa`。本包不附带客户案卷、CAD、模板、批准样图或本机路径；所需材料由使用者在本地提供。
-
-## 发布维护
-
-撰写入口与包内质检共同随 `mechanical-patent-drafting` 插件更新。质检源以该插件的 `skills/shensheng-patent-qa/` 为准，独立质检插件保留相同发布副本。发布时核对两处质检目录逐文件一致、相对链接、扫描行为、隐私及实际 GitHub 内容；提升对应版本并推送 `main`。
+旧插件的默认质检入口见 [随插件质检技能](https://github.com/yidaner4-ship-it/mechanical-patent-skill/blob/main/plugins/mechanical-patent-drafting/skills/shensheng-patent-qa/SKILL.md)。使用全流程技能时，建议从上方整包安装，按客户端能力避免同时启用重复命名的技能。仓库发布不会自动替其他电脑安装或更新技能；更新后按客户端提示重载或开启新对话。
