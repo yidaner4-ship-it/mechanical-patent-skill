@@ -18,7 +18,9 @@ import zipfile
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "tools"))
 from build_release import FIXED_ZIP_TIME, _archive_name, build_release  # noqa: E402
-from validate_plugin import (NESTED_SKILLS, PLUGIN_REL, ROOT_SKILLS, ValidationError,
+from validate_plugin import (CLAIM_POLICY_REL, COMPAT_PLUGINS, QA_SCANNER_REL,
+                             NESTED_SKILLS, PLUGIN_REL, ROOT_SKILLS, ValidationError,
+                             MARKDOWN_LINK, _resolve_reference,
                              sha256, validate_archives, validate_repository, version_tuple)  # noqa: E402
 
 
@@ -59,6 +61,39 @@ class PluginReleaseTests(unittest.TestCase):
     def skill(self, folder: Path) -> None:
         folder.mkdir(parents=True)
         (folder / "SKILL.md").write_text(f"---\nname: {folder.name}\ndescription: A test fixture skill.\n---\n\nUse the input supplied by the user.\n", encoding="utf-8")
+
+    def compatibility_fixture(self) -> tuple[Path, Path]:
+        policy = self.plugin / CLAIM_POLICY_REL
+        policy.parent.mkdir(parents=True, exist_ok=True)
+        policy.write_text("# Shared claim scope policy\n\nA self-contained public test policy.\n", encoding="utf-8")
+        scanner = self.plugin / QA_SCANNER_REL
+        scanner.parent.mkdir(parents=True, exist_ok=True)
+        scanner.write_text("print('standard-library fixture scanner')\n", encoding="utf-8")
+        canonical_qa = self.skills / "shensheng-patent-qa/SKILL.md"
+        canonical_qa.write_text(canonical_qa.read_text().replace("---\n\n", 'metadata:\n  version: "1.2.4"\n---\n\n'))
+        market = self.repo / ".agents/plugins/marketplace.json"
+        registrations = json.loads(market.read_text())
+        for name, skills in COMPAT_PLUGINS.items():
+            root = self.repo / "plugins" / name
+            version = "0.2.1" if name == "mechanical-patent-drafting" else "1.2.4"
+            write_json(root / "plugin.json", {"name": name, "version": version})
+            registrations["plugins"].append({"name": name, "source": {"source": "local", "path": f"./plugins/{name}"}})
+            for skill in skills:
+                self.skill(root / "skills" / skill)
+                entry = root / "skills" / skill / "SKILL.md"
+                entry_version = version if skill == "mechanical-patent-drafting" else "1.2.4"
+                target = ("references/claim-scope-and-names.md" if skill == "shensheng-patent-qa"
+                          else "../shensheng-patent-qa/references/claim-scope-and-names.md")
+                entry.write_text(entry.read_text().replace("---\n\n", f'metadata:\n  version: "{entry_version}"\n---\n\n')
+                                 + f"\n[Shared policy]({target})\n")
+            mirror = root / "skills/shensheng-patent-qa/references/claim-scope-and-names.md"
+            mirror.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(policy, mirror)
+            copy = root / QA_SCANNER_REL
+            copy.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(scanner, copy)
+        write_json(market, registrations)
+        return policy, scanner
 
     def test_real_archives_layout_permissions_and_offline_dry_run(self) -> None:
         report = build_release(self.repo, "1.0.0")
@@ -219,6 +254,94 @@ class PluginReleaseTests(unittest.TestCase):
         archive.write_bytes(archive.read_bytes() + b"tampered")
         with self.assertRaisesRegex(ValidationError, "checksum"):
             validate_archives(self.repo)
+
+    def test_compatibility_archives_are_independent_and_follow_the_same_policy(self) -> None:
+        policy, scanner = self.compatibility_fixture()
+        record = build_release(self.repo, "1.0.0")
+        self.assertEqual(len(record["current_compatibility_archives"]), 2)
+        self.assertEqual(len(record["archives"]), 5)
+        for name, packed_name in record["current_compatibility_archives"].items():
+            with zipfile.ZipFile(self.repo / "downloads" / packed_name) as archive:
+                self.assertEqual(archive.read("skills/shensheng-patent-qa/references/claim-scope-and-names.md"), policy.read_bytes())
+                self.assertEqual(archive.read(QA_SCANNER_REL.as_posix()), scanner.read_bytes())
+                self.assertIn("LICENSE", archive.namelist())
+                self.assertIn("THIRD_PARTY_NOTICES.md", archive.namelist())
+                extracted = Path(self.temp.name) / name
+                archive.extractall(extracted)
+            for entry in (extracted / "skills").glob("*/SKILL.md"):
+                for target in MARKDOWN_LINK.findall(entry.read_text()):
+                    self.assertIsNotNone(_resolve_reference(entry, target, extracted))
+        self.assertTrue(validate_archives(self.repo)["current_payloads_match_source"])
+
+    def test_compatibility_policy_drift_and_broken_local_route_block_build(self) -> None:
+        policy, _ = self.compatibility_fixture()
+        root = self.repo / "plugins/shensheng-patent-qa"
+        mirror = root / "skills/shensheng-patent-qa/references/claim-scope-and-names.md"
+        mirror.write_text("edited only in the compatibility copy\n", encoding="utf-8")
+        with self.assertRaisesRegex(ValidationError, "policy mirror differs"):
+            build_release(self.repo, "1.0.0")
+        self.assertFalse((self.repo / "downloads").exists())
+        shutil.copyfile(policy, mirror)
+        entry = root / "skills/shensheng-patent-qa/SKILL.md"
+        entry.write_text(entry.read_text() + "\n[Missing](references/not-distributed.md)\n", encoding="utf-8")
+        with self.assertRaisesRegex(ValidationError, "missing local reference"):
+            validate_repository(self.repo)
+
+    def test_compatibility_scanner_and_version_drift_are_rejected(self) -> None:
+        _, scanner = self.compatibility_fixture()
+        root = self.repo / "plugins/shensheng-patent-qa"
+        copied = root / QA_SCANNER_REL
+        copied.write_text("print('stale scanner')\n", encoding="utf-8")
+        with self.assertRaisesRegex(ValidationError, "scanner differs"):
+            validate_repository(self.repo)
+        shutil.copyfile(scanner, copied)
+        write_json(root / "plugin.json", {"name": "shensheng-patent-qa", "version": "1.2.5"})
+        with self.assertRaisesRegex(ValidationError, "plugin and skill versions differ"):
+            validate_repository(self.repo)
+
+    def test_compatibility_stale_payload_and_changed_installation_identity_are_rejected(self) -> None:
+        self.compatibility_fixture()
+        build_release(self.repo, "1.0.0")
+        entry = self.repo / "plugins/shensheng-patent-qa/skills/shensheng-patent-qa/SKILL.md"
+        entry.write_text(entry.read_text() + "\nA reviewed compatibility-only explanation.\n", encoding="utf-8")
+        with self.assertRaisesRegex(ValidationError, "compatibility ZIP does not follow current source"):
+            validate_archives(self.repo)
+        root = self.repo / "plugins/shensheng-patent-qa"
+        write_json(root / "plugin.json", {"name": "new-identity", "version": "1.2.4"})
+        with self.assertRaisesRegex(ValidationError, "installation identity changed"):
+            validate_repository(self.repo)
+
+    def test_compatibility_bump_preserves_prior_archives_and_rejects_downgrade(self) -> None:
+        self.compatibility_fixture()
+        build_release(self.repo, "1.0.0")
+        old = self.repo / "downloads/mechanical-patent-drafting-0.2.1.zip"
+        before = old.read_bytes()
+        root = self.repo / "plugins/mechanical-patent-drafting"
+        entry = root / "skills/mechanical-patent-drafting/SKILL.md"
+        original = entry.read_text()
+        entry.write_text(original.replace('version: "0.2.1"', 'version: "0.2.2"'))
+        write_json(root / "plugin.json", {"name": "mechanical-patent-drafting", "version": "0.2.2"})
+        build_release(self.repo, "1.0.1")
+        self.assertEqual(old.read_bytes(), before)
+        self.assertTrue((self.repo / "downloads/mechanical-patent-drafting-0.2.2.zip").exists())
+        entry.write_text(original)
+        write_json(root / "plugin.json", {"name": "mechanical-patent-drafting", "version": "0.2.1"})
+        with self.assertRaisesRegex(ValidationError, "compatibility plugin downgrade"):
+            build_release(self.repo, "1.0.1")
+
+    def test_compatibility_policy_cannot_depend_on_another_installation(self) -> None:
+        policy, _ = self.compatibility_fixture()
+        policy.write_text(policy.read_text() + "\n[Unshipped](../../../../other-plugin/SKILL.md)\n")
+        for name in COMPAT_PLUGINS:
+            shutil.copyfile(policy, self.repo / f"plugins/{name}/skills/shensheng-patent-qa/references/claim-scope-and-names.md")
+        with self.assertRaisesRegex(ValidationError, "missing local reference"):
+            validate_repository(self.repo)
+
+    def test_registered_compatibility_identity_requires_its_installable_source(self) -> None:
+        self.compatibility_fixture()
+        shutil.rmtree(self.repo / "plugins/shensheng-patent-qa")
+        with self.assertRaisesRegex(ValidationError, "registered compatibility plugin is missing"):
+            validate_repository(self.repo)
 
 
 if __name__ == "__main__":
