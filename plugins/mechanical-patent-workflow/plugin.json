@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "mechanical-patent-workflow",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "机械专利全流程：制造装配级建模、交底、申请正文、CAD附图、检索、独立质检与清洁完稿。",
   "author": {
     "name": "申晟知识产权"
