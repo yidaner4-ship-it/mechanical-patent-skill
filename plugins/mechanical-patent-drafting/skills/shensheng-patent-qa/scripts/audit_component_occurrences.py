@@ -138,7 +138,7 @@ def region_for(paragraph, config):
     if len(matching) != 1:
         raise ValueError(f'Paragraph {paragraph} needs exactly one section policy, found {len(matching)}')
     region = matching[0]
-    if region['mode'] not in {'required', 'optional', 'exempt'}:
+    if region['mode'] not in {'required', 'optional', 'exempt', 'forbidden'}:
         raise ValueError(f'Unknown section mode: {region["mode"]}')
     if region.get('style', 'either') not in {'bare', 'parenthesized', 'either'}:
         raise ValueError(f'Unknown suffix style: {region["style"]}')
@@ -154,6 +154,28 @@ def suffix_label(text, position):
     if bare:
         return bare[1], 'bare', position + bare.end()
     return '', '', position
+
+
+def forbidden_suffix_label(text, position):
+    """Recognize a label without treating an explicit bare quantity as a label.
+
+    Only the opt-in forbidden policy uses this filter. Historical suffix parsing
+    for required/optional/exempt remains unchanged. Ambiguous prose still needs
+    occurrence-level review; this is not a general quantity or formula parser.
+    """
+    found, style, end = suffix_label(text, position)
+    if style == 'bare':
+        tail = text[end:]
+        quantity = re.match(
+            r'(?:\.\d|\s*[%％°℃]|'
+            r'\s*[×÷+*/=≤≥<>±~～–—-]\s*(?:\d|[A-Za-z]|[（(]\s*(?:\d|[A-Za-z]))|'
+            r'\s*(?:毫米|厘米|微米|纳米|米|千克|克|毫升|升|秒|分钟|小时|度|个)|'
+            r'\s*(?:mm|cm|km|μm|µm|nm|m|kg|mg|g|mL|ml|L|s|min|h|'
+            r'MPa|kPa|Pa|kN|N|Hz|kHz|MHz|V|mV|A|mA|W|kW)(?![A-Za-z]))',
+            tail)
+        if quantity:
+            return '', '', position
+    return found, style, end
 
 
 def inspect(docx, config, view='accepted'):
@@ -176,10 +198,13 @@ def inspect(docx, config, view='accepted'):
         for match in pattern.finditer(text):
             name = match[0]
             entry = terms[name]
-            found, style, suffix_end = suffix_label(text, match.end())
+            parse_suffix = forbidden_suffix_label if region['mode'] == 'forbidden' else suffix_label
+            found, style, suffix_end = parse_suffix(text, match.end())
             status = 'ok'
             if region['mode'] == 'exempt':
                 status = 'exempt_section'
+            elif region['mode'] == 'forbidden':
+                status = 'unexpected_label' if found else 'ok'
             elif not found:
                 status = 'missing_label' if region['mode'] == 'required' else 'optional_unlabeled'
             elif found != entry['number']:
@@ -228,7 +253,8 @@ def inspect(docx, config, view='accepted'):
         raise ValueError(f'Stale occurrence exceptions need re-review: {sorted(unused)}')
     naming_candidates = parenthetical_name_candidates(paragraphs, terms, pattern, config)
     unresolved_candidates = [c for c in naming_candidates if c['status'] == 'needs_review']
-    error_types = {'missing_label', 'wrong_label', 'unknown_label', 'label_style', 'noncanonical_name'}
+    error_types = {'missing_label', 'wrong_label', 'unknown_label', 'label_style',
+                   'unexpected_label', 'noncanonical_name'}
     issues = [row for row in rows if row['status'] in error_types]
     summary = {
         'paragraphs': len(paragraphs), 'configured_names_and_aliases': len(terms),
