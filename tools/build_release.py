@@ -17,7 +17,8 @@ import tempfile
 import zipfile
 
 from validate_plugin import (PLUGIN_NAME, PLUGIN_REL, ValidationError, public_files,
-                             read_json, sha256, validate_repository, version_tuple)
+                             compatibility_payloads, read_json, sha256,
+                             validate_repository, version_tuple)
 
 FIXED_ZIP_TIME = (2020, 1, 1, 0, 0, 0)
 MANIFEST_NAME = "RELEASE_MANIFEST.json"
@@ -76,6 +77,14 @@ def build_release(repo_root: Path, version: str, *, versioned: bool = True) -> d
         versions.append(version_tuple(read_json(prior).get("version")))
     if requested < max(versions):
         raise ValidationError("refusing release version downgrade; use a preserved versioned ZIP for rollback")
+    legacy = report.get("compatibility_plugins", [])
+    previous_legacy = {}
+    if prior.exists():
+        previous_legacy = {entry["name"]: entry["version"] for entry in
+                           read_json(prior).get("validation", {}).get("compatibility_plugins", [])}
+    for entry in legacy:
+        if entry["name"] in previous_legacy and version_tuple(entry["version"]) < version_tuple(previous_legacy[entry["name"]]):
+            raise ValidationError(f"refusing compatibility plugin downgrade: {entry['name']}")
     manifests = [plugin / "plugin.json", plugin / ".codex-plugin/plugin.json"]
     manifest_bytes = {}
     for path in manifests:
@@ -102,6 +111,15 @@ def build_release(repo_root: Path, version: str, *, versioned: bool = True) -> d
         if versioned:
             (staged / versioned_name).write_bytes((staged / plugin_latest).read_bytes())
             names.append(versioned_name)
+        compatibility_archives = {}
+        payloads = compatibility_payloads(repo)
+        for entry in legacy:
+            name = entry["name"]
+            archive_name = entry["archive"]
+            compatibility_archives[name] = archive_name
+            packed = {relative: (path.read_bytes(), _mode(path)) for relative, path in payloads[name].items()}
+            write_archive(staged / archive_name, packed)
+            names.append(archive_name)
         # Existing dated and versioned ZIPs remain listed and untouched.
         existing = {}
         if downloads.exists():
@@ -117,6 +135,7 @@ def build_release(repo_root: Path, version: str, *, versioned: bool = True) -> d
             "canonical_skills": report["canonical_skills"],
             "current_archives": {"plugin": plugin_latest, "offline": offline_latest,
                                  "versioned_plugin": versioned_name if versioned else None},
+            "current_compatibility_archives": compatibility_archives,
             "archives": [{"name": name, "sha256": sha256(path), "bytes": path.stat().st_size}
                          for name, path in sorted(all_archives.items())],
             "plugin_files": [{"path": name, "sha256": hashlib.sha256(data).hexdigest(),

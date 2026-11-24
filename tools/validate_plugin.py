@@ -28,6 +28,12 @@ NESTED_SKILLS = frozenset({
     "patent-application", "patent-chart", "patent-disclosure", "patent-docket",
     "patent-exam-policy", "patent-map", "patent-oa", "patent-reader", "patent-search",
 })
+COMPAT_PLUGINS = {
+    "mechanical-patent-drafting": frozenset({"mechanical-patent-drafting", "shensheng-patent-qa"}),
+    "shensheng-patent-qa": frozenset({"shensheng-patent-qa"}),
+}
+CLAIM_POLICY_REL = Path("skills/patent-disclosure-skill/skills/patent-application/references/claim-scope-and-names.md")
+QA_SCANNER_REL = Path("skills/shensheng-patent-qa/scripts/audit_component_occurrences.py")
 TRANSIENT_DIRS = frozenset({
     ".git", ".venv", "venv", "env", "node_modules", "__pycache__", ".pytest_cache",
     ".mypy_cache", ".ruff_cache", ".cache", "client", "clients",
@@ -147,12 +153,23 @@ def _frontmatter(path: Path) -> None:
         raise ValidationError(f"missing skill description: {path.parent.name}")
 
 
+def _skill_version(path: Path) -> str:
+    header = path.read_text(encoding="utf-8").split("---", 2)[1]
+    found = re.search(r"(?m)^[ \t]+version:[ \t]*[\"']?([0-9]+\.[0-9]+\.[0-9]+)", header)
+    if not found:
+        raise ValidationError(f"missing skill metadata version: {path.parent.name}")
+    version_tuple(found.group(1))
+    return found.group(1)
+
+
 def _template(target: str) -> bool:
     return any(part in target for part in ("{", "}", "<", ">", "*", "...", "$", "[", "]"))
 
 
 def _resolve_reference(path: Path, target: str, plugin: Path) -> Path | None:
     """Resolve skill-relative references, including paths in supporting documents."""
+    path = Path(path).resolve()
+    plugin = Path(plugin).resolve()
     target = unquote(target.split("#", 1)[0].split("?", 1)[0])
     if not target or _template(target) or urlsplit(target).scheme or target.startswith(("/", "~")):
         return None
@@ -171,6 +188,93 @@ def _resolve_reference(path: Path, target: str, plugin: Path) -> Path | None:
                     raise ValidationError(f"reference points into an omitted runtime/cache: {target}")
                 return resolved
     raise ValidationError(f"missing local reference: {path.relative_to(plugin)} -> {target}")
+
+
+def compatibility_payloads(repo_root: Path) -> dict[str, dict[str, Path]]:
+    """Source files for optional legacy identities, including their license closure."""
+    repo = Path(repo_root).resolve()
+    payloads = {}
+    for name in COMPAT_PLUGINS:
+        plugin = repo / "plugins" / name
+        if not plugin.exists():
+            continue
+        files = {p.relative_to(plugin).as_posix(): p for p in public_files(plugin)}
+        for license_name in ("LICENSE", "THIRD_PARTY_NOTICES.md"):
+            files.setdefault(license_name, repo / license_name)
+        payloads[name] = files
+    return payloads
+
+
+def validate_compatibility(repo_root: Path) -> list[dict]:
+    """Keep standalone installs closed and policy/scanner mirrors tied to one source.
+
+    Canonical-only test sources need no legacy plugins. If a legacy identity is
+    present, it must be a complete, current self-contained distribution.
+    """
+    repo = Path(repo_root).resolve()
+    canonical = repo / PLUGIN_REL
+    marketplace = read_json(repo / ".agents/plugins/marketplace.json")
+    registered = {item.get("name") for item in marketplace.get("plugins", []) if isinstance(item, dict)}
+    for name in COMPAT_PLUGINS:
+        if name in registered and not (repo / "plugins" / name).is_dir():
+            raise ValidationError(f"registered compatibility plugin is missing: {name}")
+    present = [name for name in COMPAT_PLUGINS if (repo / "plugins" / name).exists()]
+    if not present:
+        return []
+    policy = canonical / CLAIM_POLICY_REL
+    scanner = canonical / QA_SCANNER_REL
+    if not policy.is_file() or not scanner.is_file():
+        raise ValidationError("compatibility plugins require canonical claim policy and scanner")
+    qa_version = _skill_version(canonical / "skills/shensheng-patent-qa/SKILL.md")
+    result = []
+    for name, files in compatibility_payloads(repo).items():
+        plugin = repo / "plugins" / name
+        manifest = read_json(plugin / "plugin.json")
+        if manifest.get("name") != name:
+            raise ValidationError(f"compatibility installation identity changed: {name}")
+        registrations = [item for item in marketplace.get("plugins", [])
+                         if isinstance(item, dict) and item.get("name") == name]
+        origin = registrations[0].get("source") if len(registrations) == 1 else None
+        if not isinstance(origin, dict) or origin.get("path") not in {f"./plugins/{name}", f"plugins/{name}"}:
+            raise ValidationError(f"compatibility marketplace installation identity changed: {name}")
+        version = manifest.get("version")
+        version_tuple(version)
+        roots = {p.name for p in (plugin / "skills").iterdir() if p.is_dir() and not p.name.startswith(".")}
+        if roots != COMPAT_PLUGINS[name]:
+            raise ValidationError(f"compatibility skill closure differs: {name}")
+        mirror = plugin / "skills/shensheng-patent-qa/references/claim-scope-and-names.md"
+        if not mirror.is_file() or mirror.read_bytes() != policy.read_bytes():
+            raise ValidationError(f"compatibility claim policy mirror differs from canonical source: {name}")
+        copied_scanner = plugin / QA_SCANNER_REL
+        if not copied_scanner.is_file() or copied_scanner.read_bytes() != scanner.read_bytes():
+            raise ValidationError(f"compatibility scanner differs from canonical source: {name}")
+        qa_entry = plugin / "skills/shensheng-patent-qa/SKILL.md"
+        if _skill_version(qa_entry) != qa_version:
+            raise ValidationError(f"compatibility QA version differs from canonical source: {name}")
+        if name == "shensheng-patent-qa" and version != qa_version:
+            raise ValidationError("standalone QA plugin and skill versions differ")
+        if name == "mechanical-patent-drafting" and _skill_version(plugin / "skills/mechanical-patent-drafting/SKILL.md") != version:
+            raise ValidationError("legacy drafting plugin and skill versions differ")
+        checked = 0
+        for relative, path in files.items():
+            _check_text(path, plugin if plugin in path.parents else repo)
+            if path.name == "SKILL.md":
+                _frontmatter(path)
+                policy_links = [target for target in MARKDOWN_LINK.findall(path.read_text(encoding="utf-8"))
+                                if target.split("#", 1)[0].endswith("claim-scope-and-names.md")]
+                if not policy_links or any(_resolve_reference(path, target, plugin) != mirror for target in policy_links):
+                    raise ValidationError(f"compatibility entry must route to its same-package claim policy: {name}/{path.parent.name}")
+            if path.suffix == ".md" and plugin in path.parents:
+                for target in MARKDOWN_LINK.findall(path.read_text(encoding="utf-8")):
+                    if not any(character.isspace() for character in target) and _resolve_reference(path, target, plugin) is not None:
+                        checked += 1
+        if "未改变文件摘要值且已有完整记录的版本直接复用" in qa_entry.read_text(encoding="utf-8"):
+            raise ValidationError(f"stale automatic acceptance reuse rule in compatibility QA: {name}")
+        result.append({"name": name, "version": version, "qa_version": qa_version,
+                       "archive": f"{name}-{version}.zip", "file_count": len(files),
+                       "checked_local_references": checked, "claim_policy_sha256": sha256(policy),
+                       "scanner_sha256": sha256(scanner)})
+    return result
 
 
 def validate_repository(repo_root: Path) -> dict:
@@ -248,7 +352,7 @@ def validate_repository(repo_root: Path) -> dict:
     # Requirements describe dependencies; none of these environments is bundled.
     requirements = [p.relative_to(plugin).as_posix() for p in files
                     if p.name.startswith("requirements") and p.suffix == ".txt"]
-    return {
+    result = {
         "plugin": PLUGIN_NAME, "version": main["version"],
         "canonical_skills": (PLUGIN_REL / "skills").as_posix(),
         "root_skills": sorted(roots), "skill_entrypoints": len(skill_paths),
@@ -262,6 +366,10 @@ def validate_repository(repo_root: Path) -> dict:
                                   "configured MCP connections", "user-supplied licensed PatSeek client and account"],
         "runtime_bundled": False,
     }
+    legacy = validate_compatibility(repo)
+    if legacy:
+        result["compatibility_plugins"] = legacy
+    return result
 
 
 def validate_archives(repo_root: Path) -> dict:
@@ -323,6 +431,26 @@ def validate_archives(repo_root: Path) -> dict:
                         raise ValidationError(f"ZIP executable mode differs from source: {relative}")
         except (OSError, zipfile.BadZipFile, KeyError) as exc:
             raise ValidationError(f"invalid {kind} ZIP") from exc
+    compatibility = report.get("compatibility_plugins", [])
+    expected_compat = {item["name"]: item["archive"] for item in compatibility}
+    if record.get("current_compatibility_archives", {}) != expected_compat:
+        raise ValidationError("compatibility archive inventory differs from current plugin identities")
+    for name, files in compatibility_payloads(repo).items():
+        archive_name = expected_compat[name]
+        if archive_name not in declared:
+            raise ValidationError(f"missing compatibility archive: {name}")
+        try:
+            with zipfile.ZipFile(downloads / archive_name) as archive:
+                if len(archive.namelist()) != len(files) or set(archive.namelist()) != set(files):
+                    raise ValidationError(f"compatibility ZIP inventory differs from source: {name}")
+                for relative, path in files.items():
+                    if archive.read(relative) != path.read_bytes():
+                        raise ValidationError(f"compatibility ZIP does not follow current source: {name}/{relative}")
+                    wanted = 0o755 if path.stat().st_mode & 0o111 else 0o644
+                    if stat.S_IMODE(archive.getinfo(relative).external_attr >> 16) != wanted:
+                        raise ValidationError(f"compatibility ZIP mode differs from source: {name}/{relative}")
+        except (OSError, zipfile.BadZipFile, KeyError) as exc:
+            raise ValidationError(f"invalid compatibility ZIP: {name}") from exc
     file_entries = record.get("plugin_files", [])
     declared_files = {entry.get("path"): entry for entry in file_entries if isinstance(entry, dict)}
     if len(declared_files) != len(file_entries) or set(declared_files) != set(expected):

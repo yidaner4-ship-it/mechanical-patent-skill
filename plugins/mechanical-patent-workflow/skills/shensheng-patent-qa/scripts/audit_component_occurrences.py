@@ -51,18 +51,85 @@ def extract_paragraphs(docx, view):
 
 def load_components(config):
     terms = {}
+    canonical_by_number = {}
+    strict_names = config.get('require_canonical_names', False)
+    if not isinstance(strict_names, bool):
+        raise ValueError('require_canonical_names must be a boolean')
     for component in config['components']:
         number = str(component['number'])
         if not re.fullmatch(r'\d+', number):
             raise ValueError(f'Component number must be numeric: {number}')
-        for term in [component['name'], *component.get('aliases', [])]:
+        canonical = component['name']
+        if strict_names and number in canonical_by_number and canonical_by_number[number] != canonical:
+            raise ValueError(f'Final naming requires one canonical name for number {number}')
+        canonical_by_number[number] = canonical
+        for term in [canonical, *component.get('aliases', [])]:
             if not term:
                 raise ValueError('Empty component name or alias')
             value = {'number': number, 'canonical_name': component['name']}
-            if term in terms and terms[term]['number'] != number:
+            if term in terms and (terms[term]['number'] != number or
+                                  (strict_names and terms[term]['canonical_name'] != canonical)):
                 raise ValueError(f'Ambiguous alias requires manual disambiguation: {term}')
             terms[term] = value
     return terms
+
+
+def parenthetical_name_candidates(paragraphs, terms, pattern, config):
+    """Find naming-like parentheses; unknown wording remains a manual candidate."""
+    if not config.get('require_canonical_names', False) or pattern is None:
+        return []
+    exceptions = config.get('parenthetical_name_exceptions', [])
+    used = set()
+    candidates = []
+    for paragraph in paragraphs:
+        text = paragraph['text']
+        for match in pattern.finditer(text):
+            entry = terms[match[0]]
+            found, _, suffix_end = suffix_label(text, match.end())
+            position = suffix_end if found else match.end()
+            parens = re.match(r'\s*[（(]([^（）()\n]{1,80})[）)]', text[position:])
+            if not parens:
+                continue
+            inner = parens[1].strip()
+            if re.fullmatch(r'\d+', inner):
+                continue  # Normal reference-numeral parentheses.
+            known = terms.get(inner)
+            preceding_number = re.search(r'(?<!\d)(\d+)\s*[、.．:：]\s*$', text[:match.start()])
+            legend_item = preceding_number is not None and preceding_number[1] == entry['number']
+            kind = ''
+            if known and inner != match[0]:
+                kind = ('parenthetical_alias' if known['number'] == entry['number']
+                        else 'parenthetical_component_name')
+            elif legend_item and not re.search(
+                    r'^(?:用于|用作|供|例如|如图|参见|其中|注[:：]|安装于|位于|固定于|连接于)|[=+*/≤≥<>]', inner):
+                kind = 'legend_parenthetical_text'
+            if not kind:
+                continue
+            end = position + parens.end()
+            candidate = {
+                'paragraph': paragraph['paragraph'], 'source_paragraph': paragraph['source_paragraph'],
+                'start': match.start(), 'end': end, 'name': match[0],
+                'canonical_name': entry['canonical_name'], 'expected_label': entry['number'],
+                'text': text[match.start():end], 'parenthetical_text': inner,
+                'kind': kind, 'status': 'needs_review', 'exception_reason': '',
+            }
+            matching = [e for e in exceptions if e['paragraph'] == candidate['paragraph']
+                        and e['start'] == candidate['start'] and e['text'] == candidate['text']]
+            if len(matching) > 1:
+                raise ValueError('Duplicate parenthetical naming exception')
+            if matching:
+                exception = matching[0]
+                reason = exception['reason'].strip()
+                if not reason:
+                    raise ValueError('Each parenthetical naming exception needs a reason')
+                candidate['status'] = 'accepted_exception'
+                candidate['exception_reason'] = reason
+                used.add((exception['paragraph'], exception['start'], exception['text']))
+            candidates.append(candidate)
+    configured = {(e['paragraph'], e['start'], e['text']) for e in exceptions}
+    if configured - used:
+        raise ValueError(f'Stale parenthetical naming exceptions need re-review: {sorted(configured-used)}')
+    return candidates
 
 
 def region_for(paragraph, config):
@@ -71,7 +138,7 @@ def region_for(paragraph, config):
     if len(matching) != 1:
         raise ValueError(f'Paragraph {paragraph} needs exactly one section policy, found {len(matching)}')
     region = matching[0]
-    if region['mode'] not in {'required', 'optional', 'exempt'}:
+    if region['mode'] not in {'required', 'optional', 'exempt', 'forbidden'}:
         raise ValueError(f'Unknown section mode: {region["mode"]}')
     if region.get('style', 'either') not in {'bare', 'parenthesized', 'either'}:
         raise ValueError(f'Unknown suffix style: {region["style"]}')
@@ -89,6 +156,28 @@ def suffix_label(text, position):
     return '', '', position
 
 
+def forbidden_suffix_label(text, position):
+    """Recognize a label without treating an explicit bare quantity as a label.
+
+    Only the opt-in forbidden policy uses this filter. Historical suffix parsing
+    for required/optional/exempt remains unchanged. Ambiguous prose still needs
+    occurrence-level review; this is not a general quantity or formula parser.
+    """
+    found, style, end = suffix_label(text, position)
+    if style == 'bare':
+        tail = text[end:]
+        quantity = re.match(
+            r'(?:\.\d|\s*[%％°℃]|'
+            r'\s*[×÷+*/=≤≥<>±~～–—-]\s*(?:\d|[A-Za-z]|[（(]\s*(?:\d|[A-Za-z]))|'
+            r'\s*(?:毫米|厘米|微米|纳米|米|千克|克|毫升|升|秒|分钟|小时|度|个)|'
+            r'\s*(?:mm|cm|km|μm|µm|nm|m|kg|mg|g|mL|ml|L|s|min|h|'
+            r'MPa|kPa|Pa|kN|N|Hz|kHz|MHz|V|mV|A|mA|W|kW)(?![A-Za-z]))',
+            tail)
+        if quantity:
+            return '', '', position
+    return found, style, end
+
+
 def inspect(docx, config, view='accepted'):
     paragraphs, boundary_review = extract_paragraphs(docx, view)
     terms = load_components(config)
@@ -98,6 +187,7 @@ def inspect(docx, config, view='accepted'):
     names = sorted(terms, key=lambda term: (-len(term), term))
     pattern = re.compile('|'.join(re.escape(name) for name in names)) if names else None
     exceptions = config.get('exceptions', [])
+    strict_names = config.get('require_canonical_names', False)
     rows = []
     used_exceptions = set()
     for paragraph in paragraphs:
@@ -108,16 +198,23 @@ def inspect(docx, config, view='accepted'):
         for match in pattern.finditer(text):
             name = match[0]
             entry = terms[name]
-            found, style, suffix_end = suffix_label(text, match.end())
+            parse_suffix = forbidden_suffix_label if region['mode'] == 'forbidden' else suffix_label
+            found, style, suffix_end = parse_suffix(text, match.end())
             status = 'ok'
             if region['mode'] == 'exempt':
                 status = 'exempt_section'
+            elif region['mode'] == 'forbidden':
+                status = 'unexpected_label' if found else 'ok'
             elif not found:
                 status = 'missing_label' if region['mode'] == 'required' else 'optional_unlabeled'
             elif found != entry['number']:
                 status = 'wrong_label' if found in numbers else 'unknown_label'
             elif region.get('style', 'either') not in {'either', style}:
                 status = 'label_style'
+            label_status = status
+            noncanonical = strict_names and name != entry['canonical_name']
+            if noncanonical:
+                status = 'noncanonical_name'
             reason = ''
             matched_exceptions = [exception for exception in exceptions
                                   if exception['paragraph'] == paragraph['paragraph']
@@ -131,7 +228,12 @@ def inspect(docx, config, view='accepted'):
                 reason = exception['reason'].strip()
                 if not reason:
                     raise ValueError('Each occurrence exception needs a reason')
-                status = 'accepted_exception'
+                non_component = exception.get('non_component_usage', False)
+                if not isinstance(non_component, bool):
+                    raise ValueError('non_component_usage must be a boolean')
+                # An old suffix exception cannot silently authorize a formal alias.
+                if not noncanonical or non_component:
+                    status = 'accepted_exception'
             rows.append({
                 'occurrence_id': f'P{paragraph["paragraph"]:04}-C{match.start():04}',
                 'paragraph': paragraph['paragraph'], 'source_paragraph': paragraph['source_paragraph'],
@@ -139,6 +241,9 @@ def inspect(docx, config, view='accepted'):
                 'name': name, 'canonical_name': entry['canonical_name'],
                 'expected_label': entry['number'], 'actual_label': found,
                 'actual_style': style, 'policy': region['mode'], 'status': status,
+                'label_status': label_status,
+                'naming_status': ('noncanonical_name' if noncanonical else
+                                  ('canonical' if strict_names else 'not_checked')),
                 'context': text[max(0, match.start()-22):min(len(text), max(match.end(), suffix_end)+22)],
                 'exception_reason': reason,
             })
@@ -146,7 +251,10 @@ def inspect(docx, config, view='accepted'):
     unused = configured_exceptions - used_exceptions
     if unused:
         raise ValueError(f'Stale occurrence exceptions need re-review: {sorted(unused)}')
-    error_types = {'missing_label', 'wrong_label', 'unknown_label', 'label_style'}
+    naming_candidates = parenthetical_name_candidates(paragraphs, terms, pattern, config)
+    unresolved_candidates = [c for c in naming_candidates if c['status'] == 'needs_review']
+    error_types = {'missing_label', 'wrong_label', 'unknown_label', 'label_style',
+                   'unexpected_label', 'noncanonical_name'}
     issues = [row for row in rows if row['status'] in error_types]
     summary = {
         'paragraphs': len(paragraphs), 'configured_names_and_aliases': len(terms),
@@ -154,6 +262,9 @@ def inspect(docx, config, view='accepted'):
         'required_occurrences': sum(row['policy'] == 'required' for row in rows),
         'explicit_exemptions': sum(row['status'] == 'accepted_exception' for row in rows),
         'paragraph_boundary_reviews': len(boundary_review),
+        'require_canonical_names': strict_names,
+        'noncanonical_name_issues': sum(row['status'] == 'noncanonical_name' for row in rows),
+        'parenthetical_naming_reviews': len(unresolved_candidates),
         'unmatched_configured_terms': sorted(set(terms)-{row['name'] for row in rows}),
     }
     return {
@@ -161,10 +272,12 @@ def inspect(docx, config, view='accepted'):
         'document_sha256': hashlib.sha256(Path(docx).read_bytes()).hexdigest(),
         'view': view, 'summary': summary, 'paragraphs': paragraphs,
         'occurrences': rows, 'issues': issues, 'boundary_review': boundary_review,
+        'parenthetical_name_candidates': naming_candidates,
         'limitations': [
             'Matches only the configured names and aliases. Manual review must add shorthand, grouped names, unnamed features, and components absent from the dictionary.',
             'Suffix checks do not establish that the referenced feature is present in the drawing or that its leader points to the intended entity.',
             'Paragraph numbers refer to the selected view and are not rendered page numbers.',
+            'Final naming checks recognize only configured terms and naming-like parentheses. Unknown synonyms, short forms, quotations and structural type descriptions still require contextual human review.',
         ],
     }
 
@@ -184,13 +297,14 @@ def main():
         json.dumps(result, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     columns = ['occurrence_id','paragraph','source_paragraph','section','start','end','name',
                'canonical_name','expected_label','actual_label','actual_style','policy','status',
-               'context','exception_reason']
+               'context','exception_reason','label_status','naming_status']
     with arguments.output.with_suffix('.csv').open('w',encoding='utf-8-sig',newline='') as stream:
         writer = csv.DictWriter(stream,fieldnames=columns)
         writer.writeheader()
         writer.writerows(result['occurrences'])
     print(json.dumps(result['summary'],ensure_ascii=False))
-    if arguments.fail_on_issues and (result['issues'] or result['boundary_review']):
+    if arguments.fail_on_issues and (result['issues'] or result['boundary_review'] or
+                                   result['summary']['parenthetical_naming_reviews']):
         raise SystemExit(1)
 
 

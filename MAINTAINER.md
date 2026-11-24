@@ -6,6 +6,8 @@
 
 私有电脑技能、原始案卷与公开插件有不同分发边界。本机修改需要先核对许可、去掉个人路径及授权、换掉客户原图并完成工具验证，再合入公开源码。受限官方缓存、未许可第三方原件、账号与vendor客户端不得直接复制；公开兼容入口的来源和能力边界继续保留。
 
+独权保护层次与正式特征名称只维护在统一插件内`patent-disclosure-skill/skills/patent-application/references/claim-scope-and-names.md`。两个旧兼容插件为独立安装保留同包分发镜像，位于各自QA技能的`references/claim-scope-and-names.md`；镜像从唯一规范源复制，不单独改规则。发布校验强制镜像字节及QA扫描脚本一致，并核对版本、市场身份和包内引用闭合。其他入口链接细则，不复制另一套判断标准。
+
 ## 发布一个版本
 
 1. 修改公开插件源码，保留现行权1、附图和质检要求。原生应用、依赖、模型、模板和用户数据不进入插件缓存或发布包。
@@ -17,7 +19,9 @@ python3 tools/build_release.py --version 1.0.1
 python3 tools/validate_plugin.py --check-archives
 ```
 
-版本同步至portable和兼容manifest。工具生成最新插件ZIP、离线技能ZIP、版本化插件ZIP及清单／SHA256，不连接服务、不安装软件、不替你推送GitHub。
+版本同步至统一插件的portable和Codex兼容manifest。工具生成最新插件ZIP、离线技能ZIP、版本化统一插件ZIP及清单／SHA256。仓库中存在两个旧兼容插件时，还按各自manifest版本生成`mechanical-patent-drafting-X.Y.Z.zip`及`shensheng-patent-qa-X.Y.Z.zip`，保持原安装身份。生成物包含包内细则和许可，校验实际ZIP条目与对应源码，不要求包外绝对路径。工具不连接服务、不安装软件、不替你推送GitHub。
+
+旧兼容插件的语义或扫描能力改变时，分别递增其插件和技能版本；随包QA版本与统一插件QA版本一致。历史日期和旧版本ZIP保持不动。`--no-versioned`仅省略统一插件的可选版本ZIP，不省略仍提供下载的兼容插件版本ZIP。测试允许不含旧兼容入口的纯统一插件fixture，但正式仓库保留在市场中的入口必须完成上述校验。
 
 4. 检查版本差异、清单、许可、敏感数据、执行位及离线解压内容，确认插件ZIP可被宿主识别。为模拟更新，将测试源副本升版并在隔离CODEX_HOME验证，不对真实用户环境反复试装。
 5. 将插件目录、市场声明、说明、发布工具和downloads产物一起提交并推送到GitHub的main。只改ZIP、只改本机私有技能或只改版本号，都不能等同于完整发布。

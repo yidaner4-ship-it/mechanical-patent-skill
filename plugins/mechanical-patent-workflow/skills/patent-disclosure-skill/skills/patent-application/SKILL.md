@@ -25,6 +25,8 @@ metadata:
 
 ## 步骤
 
+独立权项起草和实质改稿先读[独权保护层次与特征名称](references/claim-scope-and-names.md)，将上位、简洁、抽象及全稿唯一命名落实到实际稿件；外观设计不套独权流程。
+
 0. 机械结构类发明或实用新型，先 **`Read`** [申晟机械结构专利撰写风格](../../../mechanical-patent-drawings/references/shensheng-drafting-style.md)，再进入下列首次起草或已有稿迭代分支。该参考的机械行文约定优先于通用模板中的方法步骤、软件系统示例；材料支持、保护范围和本轮修改范围仍按本案要求核对。
    同时按[接入与定稿收尾](../../../mechanical-patent-drawings/references/drafting-and-review.md#接入与定稿收尾)记录核定材料、程序阶段和底稿，并在首次成稿及迭代末尾执行其适用收尾。
 
