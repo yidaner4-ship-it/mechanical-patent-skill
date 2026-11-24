@@ -6,7 +6,7 @@
 
 私有电脑技能、原始案卷与公开插件有不同分发边界。本机修改需要先核对许可、去掉个人路径及授权、换掉客户原图并完成工具验证，再合入公开源码。受限官方缓存、未许可第三方原件、账号与vendor客户端不得直接复制；公开兼容入口的来源和能力边界继续保留。
 
-独权保护层次与正式特征名称只维护在统一插件内`patent-disclosure-skill/skills/patent-application/references/claim-scope-and-names.md`。两个旧兼容插件为独立安装保留同包分发镜像，位于各自QA技能的`references/claim-scope-and-names.md`；镜像从唯一规范源复制，不单独改规则。发布校验强制镜像字节及QA扫描脚本一致，并核对版本、市场身份和包内引用闭合。其他入口链接细则，不复制另一套判断标准。
+独权保护层次、正式特征名称及机械新特征引入关系只维护在统一插件内`patent-disclosure-skill/skills/patent-application/references/claim-scope-and-names.md`。两个旧兼容插件为独立安装保留同包分发镜像，位于各自QA技能的`references/claim-scope-and-names.md`；镜像从唯一规范源复制，不单独改规则。发布校验强制镜像字节及QA扫描脚本一致，并核对版本、市场身份和包内引用闭合。其他入口链接细则，不复制另一套判断标准。
 
 ## 发布一个版本
 

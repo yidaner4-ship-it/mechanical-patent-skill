@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "plugin": "mechanical-patent-workflow",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "canonical_skills": "plugins/mechanical-patent-workflow/skills",
   "current_archives": {
     "plugin": "mechanical-patent-workflow-latest.zip",
     "offline": "mechanical-patent-toolkit-latest.zip",
-    "versioned_plugin": "mechanical-patent-workflow-1.0.3.zip"
+    "versioned_plugin": "mechanical-patent-workflow-1.0.4.zip"
   },
   "current_compatibility_archives": {
-    "mechanical-patent-drafting": "mechanical-patent-drafting-0.2.1.zip",
-    "shensheng-patent-qa": "shensheng-patent-qa-1.2.4.zip"
+    "mechanical-patent-drafting": "mechanical-patent-drafting-0.2.2.zip",
+    "shensheng-patent-qa": "shensheng-patent-qa-1.2.5.zip"
   },
   "archives": [
     {
@@ -19,14 +19,19 @@
       "bytes": 40013
     },
     {
+      "name": "mechanical-patent-drafting-0.2.2.zip",
+      "sha256": "597570804fd6890184b2d43f13827b5f807d93cad949b0f5d6dd25cfdfd4260b",
+      "bytes": 41743
+    },
+    {
       "name": "mechanical-patent-toolkit-20261123.zip",
       "sha256": "0fbeeeeab5d8868c06f1c37fcd46e6a843aba4ac20c893a700ec2d542776ff87",
       "bytes": 6304450
     },
     {
       "name": "mechanical-patent-toolkit-latest.zip",
-      "sha256": "359d39ef3b38601bf48f204c5c7be13d5c2c4de8c4fa11c4a8d3aadc1cf1b785",
-      "bytes": 6296350
+      "sha256": "8c475772d28e7aaf74a5d9fe0de8ce0bc43dccc41b7bdef838bdd5bf18248c8a",
+      "bytes": 6298704
     },
     {
       "name": "mechanical-patent-workflow-1.0.0.zip",
@@ -49,20 +54,30 @@
       "bytes": 6289268
     },
     {
+      "name": "mechanical-patent-workflow-1.0.4.zip",
+      "sha256": "686cc6984dd6026e4a807b98f53beafcadaf7e3e29307a8bd1411559d685ac69",
+      "bytes": 6291602
+    },
+    {
       "name": "mechanical-patent-workflow-latest.zip",
-      "sha256": "5c7eba4311c3cb48b789693668b75b7b796e7a3be9f68300aa4717f978938ae8",
-      "bytes": 6289268
+      "sha256": "686cc6984dd6026e4a807b98f53beafcadaf7e3e29307a8bd1411559d685ac69",
+      "bytes": 6291602
     },
     {
       "name": "shensheng-patent-qa-1.2.4.zip",
       "sha256": "e66b235bc5df0c6ea4a32048058e55a439c391f2053e704fef3b819394091f6b",
       "bytes": 34975
+    },
+    {
+      "name": "shensheng-patent-qa-1.2.5.zip",
+      "sha256": "bb450001df727560bef771da09916a01769a6c69e2b908cc4e313f9e887f2cd2",
+      "bytes": 36630
     }
   ],
   "plugin_files": [
     {
       "path": ".codex-plugin/plugin.json",
-      "sha256": "6f6497d828501c896f7a9bd84ef18a7a68acd06de180285bd8f300516faa1b41",
+      "sha256": "088eec7ba698613adcdd4be71e2d54ef498f6031ddf021b801d2f8e2b0bf3285",
       "mode": "0644",
       "bytes": 1176
     },
@@ -86,7 +101,7 @@
     },
     {
       "path": "plugin.json",
-      "sha256": "ed89d227c42e5122808f684c5b58b6615d32b9be5804ceb882c35945af74b662",
+      "sha256": "e3730b40d765d097f260158810c2141f6b517ee5b82d869bcd365fdccd74c6ed",
       "mode": "0644",
       "bytes": 1595
     },
@@ -218,9 +233,9 @@
     },
     {
       "path": "skills/mechanical-patent-drawings/references/shensheng-drafting-style.md",
-      "sha256": "68aa2807e4c47ec71af29b9b8fa0e93d381b84d03ecac8aaf7bde083e70825b7",
+      "sha256": "49805457765515dd0226f2613f138ee7bc625a74cb5fe657c6b7f1632b27feed",
       "mode": "0644",
-      "bytes": 6751
+      "bytes": 7143
     },
     {
       "path": "skills/mechanical-patent-drawings/scripts/audit_drawing_docx.py",
@@ -302,9 +317,9 @@
     },
     {
       "path": "skills/patent-disclosure-skill/skills/patent-application/prompts/claims_builder.md",
-      "sha256": "aff1a5999f656032660023b9ce6db856356c81b70cc1556a438c9a9a0930cbe1",
+      "sha256": "dd38a2822d1997bbba20625e038985457e4fece7f341ad3c9daeb85746d19a23",
       "mode": "0644",
-      "bytes": 3090
+      "bytes": 3636
     },
     {
       "path": "skills/patent-disclosure-skill/skills/patent-application/prompts/consistency.md",
@@ -374,21 +389,21 @@
     },
     {
       "path": "skills/patent-disclosure-skill/skills/patent-application/prompts/self_check.md",
-      "sha256": "eb2f6a56c46624655e176ff6be66026f33f5887a673767a869e9cfa35dcc6765",
+      "sha256": "a718ed0902769cdd871c113d38bd707cac468cbac0a56a2163ec716ae9dab713",
       "mode": "0644",
-      "bytes": 3448
+      "bytes": 3719
     },
     {
       "path": "skills/patent-disclosure-skill/skills/patent-application/prompts/specification_builder.md",
-      "sha256": "e7fc8cdc0058d11663655fa2d29a9c4c1305238c6c3166de476470817f6e778e",
+      "sha256": "ebf541586ea0c5f48fc1371f28ebab0b7bdd1ecc546511c69cc2c4824c54b12d",
       "mode": "0644",
-      "bytes": 7307
+      "bytes": 7662
     },
     {
       "path": "skills/patent-disclosure-skill/skills/patent-application/references/claim-scope-and-names.md",
-      "sha256": "73b235e9df27781018d689ec61b41e5841c6fe7058015d9d9568ac1aff922649",
+      "sha256": "59106c08947a4c35f9367f44ed988665ba50008b581ef64560aa25883ed815cc",
       "mode": "0644",
-      "bytes": 9389
+      "bytes": 12850
     },
     {
       "path": "skills/patent-disclosure-skill/skills/patent-application/references/design_view_cnipa.md",
@@ -3416,9 +3431,9 @@
     },
     {
       "path": "skills/shensheng-patent-qa/SKILL.md",
-      "sha256": "2313416a41984043e54e0eb4f36afebf29cbfd1426bdfddd82675c14abb6b112",
+      "sha256": "20397f1211de891b1f6cb2dc3c9a9bb0c86cc4b0149db8fa8e1f3074d4bd48ab",
       "mode": "0644",
-      "bytes": 15255
+      "bytes": 15803
     },
     {
       "path": "skills/shensheng-patent-qa/agents/openai.yaml",
@@ -3561,7 +3576,7 @@
   ],
   "validation": {
     "plugin": "mechanical-patent-workflow",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "canonical_skills": "plugins/mechanical-patent-workflow/skills",
     "root_skills": [
       "documents",
@@ -3578,7 +3593,7 @@
     ],
     "skill_entrypoints": 20,
     "file_count": 583,
-    "checked_local_references": 179,
+    "checked_local_references": 180,
     "approved_style": {
       "json": "skills/mechanical-patent-drawings/references/approved-leader-style.json",
       "json_sha256": "bf9d9bb967977c3aeba20e56f00d36f2f2655d234d06db8936df1a71edf74e51",
@@ -3614,22 +3629,22 @@
     "compatibility_plugins": [
       {
         "name": "mechanical-patent-drafting",
-        "version": "0.2.1",
-        "qa_version": "1.2.4",
-        "archive": "mechanical-patent-drafting-0.2.1.zip",
+        "version": "0.2.2",
+        "qa_version": "1.2.5",
+        "archive": "mechanical-patent-drafting-0.2.2.zip",
         "file_count": 14,
-        "checked_local_references": 16,
-        "claim_policy_sha256": "73b235e9df27781018d689ec61b41e5841c6fe7058015d9d9568ac1aff922649",
+        "checked_local_references": 17,
+        "claim_policy_sha256": "59106c08947a4c35f9367f44ed988665ba50008b581ef64560aa25883ed815cc",
         "scanner_sha256": "6b38f2959104d42d2f4f7df621b6407db5987e5850adb1eda01255da11459715"
       },
       {
         "name": "shensheng-patent-qa",
-        "version": "1.2.4",
-        "qa_version": "1.2.4",
-        "archive": "shensheng-patent-qa-1.2.4.zip",
+        "version": "1.2.5",
+        "qa_version": "1.2.5",
+        "archive": "shensheng-patent-qa-1.2.5.zip",
         "file_count": 12,
-        "checked_local_references": 13,
-        "claim_policy_sha256": "73b235e9df27781018d689ec61b41e5841c6fe7058015d9d9568ac1aff922649",
+        "checked_local_references": 14,
+        "claim_policy_sha256": "59106c08947a4c35f9367f44ed988665ba50008b581ef64560aa25883ed815cc",
         "scanner_sha256": "6b38f2959104d42d2f4f7df621b6407db5987e5850adb1eda01255da11459715"
       }
     ]
