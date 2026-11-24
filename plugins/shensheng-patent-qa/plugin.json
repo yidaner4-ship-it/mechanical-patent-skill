@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "shensheng-patent-qa",
-  "version": "1.2.0",
+  "version": "1.2.4",
   "description": "单独审稿使用的独立质检入口；机械专利撰写插件已包含同版技能，无需重复安装。",
   "extensions": {
     "com.openai": {
