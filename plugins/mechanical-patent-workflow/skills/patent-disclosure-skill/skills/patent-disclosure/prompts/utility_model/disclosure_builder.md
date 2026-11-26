@@ -81,7 +81,7 @@
 - [ ] 第三章可追溯 StructureSchema  
 - [ ] 附图仅来自 `figure_plan` 且「如图 N」与 `fig` 对齐  
 - [ ] 总装+局部入文时 `relates_to` 已写且正文联读一致  
-- [ ] 查新使用 `--type utility_model`（或 all 后人工筛）；第二轮不足 4 条已同 IPC 回补，未编造凑数  
+- [ ] 查新覆盖相关发明与实用新型，使用`--type all`或分两类检索后合并，按技术相关性筛选；适用非专利资料按问题补查，第二轮不足4条已同IPC回补，未编造凑数
 - [ ] 未把外观美感 / 纯方法写成构造主线  
 - [ ] 已核验结构图源、几何及标引；合格CAD衍生图登记为lineart并留来源／核验记录，未处理截图未直接入文；部件及子特征号码对齐台账  
 - [ ] 交付回复末块为 **`## 交付后请确认`**（`../delivery_confirm.md`）；政策简报仅第 4 条且按 **`skills/patent-exam-policy/prompts/soft_nudge.md`**

@@ -15,7 +15,7 @@
 对「手段词 + 功效词」仍用本包 `tools/crawl/cnipa_epub_search.py`，**一词一页**。
 
 ```bash
-python skills/patent-disclosure/tools/crawl/cnipa_epub_search.py --type invention 手段词 功效词
+python skills/patent-disclosure/tools/crawl/cnipa_epub_search.py --type all 手段词 功效词
 ```
 
 读 `EPUB_NOTE:` / `EPUB_HITS_JSON:`：命中多且方案接近 → `dense`；有区别空间 → `sparse`；脚本失败或没跑 → `unchecked`。不要把首篇 1.1 对比清单整段复制进矩阵。

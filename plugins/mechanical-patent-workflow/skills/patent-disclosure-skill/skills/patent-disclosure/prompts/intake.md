@@ -4,6 +4,8 @@
 
 在开始专利挖掘与交底书撰写前，用**少量问题**收敛案件边界。信息不全时可跳过，由 Agent 后续推断并**注明假设**。
 
+机械方案另按[工程价值、可专利性与必要性](../references/engineering-value-and-patentability.md)识别当前任务是新方案设计、已有方案挖点还是依据既有事实成文。优先从材料整理真实用途、工况、基础方案及不足；新设计的关键指标附依据和拟验收方法。可逆拟定标明假设，不得凭推断补造已完成的研发或实测事实。已有信息不重复询问，只有会实质改变核心方案且无法判断的缺口才提问。
+
 ## 可选开场
 
 ```
@@ -52,7 +54,7 @@
 | 实用新型 | `skills/patent-disclosure/prompts/utility_model/` + `prompts/fill_structure_schema.md`（含 **`figure_plan.yaml`**） |
 | 外观设计 | `skills/patent-disclosure/prompts/design/` + `prompts/fill_appearance_schema.md`（含 **`figure_plan.yaml`**） |
 
-查新时把类型传给检索工具：`--type invention|utility_model|design`（见 `prior_art_search.md`）。
+拟申请类型与查新范围分别管理：发明/实用新型技术查新覆盖相关发明与实用新型，本脚本用`--type all`（噪声过多时分两类检索后合并），并按需核实非专利资料；外观继续用`--type design`。不得因拟申请类型而漏掉另一类技术专利，具体参数与证据边界见`prior_art_search.md`。
 
 ## 总结性反问（材料更偏实用 / 外观时）
 

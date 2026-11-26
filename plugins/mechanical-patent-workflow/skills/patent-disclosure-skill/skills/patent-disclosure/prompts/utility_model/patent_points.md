@@ -2,11 +2,13 @@
 
 **本文件仅用于专利类型 = 实用新型。** 发明请用 `../invention/patent_points_analyzer.md`；外观请用 `../design/patent_points.md`。
 
+先读[工程价值、可专利性与必要性](../../references/engineering-value-and-patentability.md)，从真实需求、简洁基准及初检证据提出结构改进。对新增结构做收益/复杂度比较和删除、合并及常规替换检验，不要求每个普通必要零件单独创新。控制、检测及操作顺序用于解释作用，核心保护落到结构、连接、相对位置和机械配合。
+
 须先（或并行）完成 **`prompts/fill_structure_schema.md`**，产出案件目录 **`structure_schema.yaml`**（或 `.json`）及 **`figure_plan.yaml`**。挖点叙述须能回溯到 schema 的 `parts` / `relations` / `spatial`，并**主动联读** `figure_plan.relates_to`（勿只当入文清单）。
 
 ## Step 3：候选结构点
 
-列出 **2–4 个**候选（结构向，勿默认「方法」）：
+按实际材料列出候选，通常可比较2–4个（结构向，勿默认「方法」）；不足时如实减少，不凑数或增设无收益结构：
 
 每个候选须说明：
 
@@ -17,6 +19,7 @@
 | 图证 | 支撑该候选的 `fig`（及 `relates_to` 链）；局部图优先作创新落点 |
 | 与现有技术区别 | 可先据材料推断；查新后在第一章收紧 |
 | 可实施性 | 普通技术人员能否按图制造/装配；`uncertain` 不得写成既定尺寸公差 |
+| 工程取舍 | 实际工况、作用机理与收益证据、新增代价，以及删除/合并/常规替换后的影响；必要防护、可靠性和维护结构须按承担工况判断 |
 
 若 `not_utility_model_signals` 非空（如纯算法、纯外观美感、方法步骤为主）：**反问**是否改发明或外观，勿硬写实用新型。
 
@@ -45,6 +48,7 @@
 - 若多个候选分别落在同一 `relates_to` 链（如总装+卡扣局部）：**默认合成一篇**（总装定范围、局部定区分特征）。  
 - 输出策略与发明相同：**默认一篇**最有价值的交底；保护型 1+N 等首篇定稿后走 `prompts/fence/`；用户要多篇且未走该旁路时先列大纲再约定顺序。  
 - 选定依据：构造可区分性、可实施、保护范围（装置书式）、查新后差异化、**图证链是否闭合**。查新走 `../prior_art_search.md`：结构区别能指到具体文献即可 **带疑点过**；指不到则 **不过** 仍成文、降级写，禁止假 D1。
+- 工程价值与专利空间分别评价，简单有效的改进同样查新；仅有差异不自动说明具有创造性。专利空间不足时不强行追加机构、特殊尺寸或操作步骤；新拟定与原材料事实分别标记，成文完成不等于建议申请。
 
 ### 选定后须固化
 
@@ -52,4 +56,4 @@
 2. StructureSchema 定稿路径（workdir 或 knowledge）  
 3. **`figure_plan.yaml`**（入文图按 score 排序；与 `parts`/`covers` 一致；支撑选定点的图际链 `relates_to` 已写；主题变了须重评）
 
-下一步：**`Read`** 同目录 `disclosure_builder.md` + `template_reference.md`（Step 7）；查新走 `../prior_art_search.md` 且 **`--type utility_model`**。
+下一步：**`Read`** 同目录 `disclosure_builder.md` + `template_reference.md`（Step 7）；查新走 `../prior_art_search.md`，技术专利范围覆盖发明与实用新型，采用 **`--type all`** 或分两类检索后合并，不因拟申请实用新型而限缩为单一类。
