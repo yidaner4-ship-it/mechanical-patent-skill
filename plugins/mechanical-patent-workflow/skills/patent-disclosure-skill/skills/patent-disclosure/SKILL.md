@@ -22,7 +22,7 @@ metadata:
 
 ## 输入
 
-发明人材料、项目目录、可选 `.tex`；类型与联系人在 `prompts/intake.md` 收敛，不全可推断并注明假设。`--type` 与 intake 一致。线稿、CAD、公式、Word 出图、PDF 转 md 用本包 `tools/`。
+发明人材料、项目目录、可选 `.tex`；拟申请类型与联系人在 `prompts/intake.md` 收敛，不全可推断并注明假设。查新范围与拟申请类型分开：发明/实用新型技术查新覆盖相关发明与实用新型及适用非专利资料，外观沿专用规则；工具参数见 `prompts/prior_art_search.md`。线稿、CAD、公式、Word 出图、PDF 转 md 用本包 `tools/`。
 
 ## 步骤
 
@@ -30,10 +30,13 @@ metadata:
 
 同案材料接入及交底交付执行[接入与定稿收尾](../../../mechanical-patent-drawings/references/drafting-and-review.md#接入与定稿收尾)的适用部分。机械产品不因发明类型套算法主线；已授权按模型写稿／取图时直接使用可用CAD解析路径，图源及标引按机械权威规则，不重复询问是否解析。单纯交底不因此自动扩成申请五书或另做不适用的申请定稿检索。
 
+机械结构类发明、实用新型在方案设计、挖点及迭代时，先读[工程价值、可专利性与必要性](references/engineering-value-and-patentability.md)。从真实需求与简洁基准出发，提前初检，比较改进收益和新增复杂度，并做删除、合并及常规替换检验。已有方案按适用范围回核，不为申请而追加无实际收益的结构；已有材料中的建议与已披露事实分别管理。
+
 | 步骤 | 文件 |
 |------|------|
 | Step 1 | `prompts/intake.md` |
 | Step 2 | `prompts/project_scan.md`；有 `.tex` 再 `Read prompts/tex_scan.md` |
+| 机械方案设计与挖点前 | `references/engineering-value-and-patentability.md`；初检提前用于方案决策，Step 5复用并按变更补检 |
 | Step 3–4 | `prompts/invention/` · `utility_model/` · `design/` 挖点 |
 | 填表 / 线稿 | `prompts/fill_*`、`image_gen.md`、`*_lineart_*.md`；外观视图口径 `references/design_view_cnipa.md`；外观成文前 `tools/check_design_views.py`；结构案成文前 `tools/check_source_parts.py` |
 | Step 5 | `prompts/prior_art_search.md`（轻量查新：3～4 个手段短语，公布模式每页 10 条，LLM 摘要精排） |
@@ -60,6 +63,7 @@ python skills/patent-disclosure/tools/fence/check_scorecard.py -i outputs/{案�
 
 - 细则在各步 prompt；围栏先 `Read` `prompts/fence/guardrails.md`。
 - 禁止假 D1，禁止空喊创新性强。未披露部件写入 `uncertain`，不进入权要或说明书。
+- 候选数量按真实机会确定；不得以结构复杂、零件多或凑够专利点代替贡献。工程拟定和建议不得冒充既有实施事实，成文完成不等于可授权或实物验证通过。
 - 未确认立项说明，不分件写多篇交底。
 
 ## 产出物

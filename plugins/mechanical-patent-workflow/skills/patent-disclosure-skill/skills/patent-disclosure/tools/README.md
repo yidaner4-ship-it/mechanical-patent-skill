@@ -19,7 +19,7 @@
 
 著录检索（发明人/申请人/分类号等高级查询）是另一个技能包，**不是**本目录脚本。本包查新只用上面的 `crawl/`，不要 import、不要调用检索爬虫。整仓时入口在仓库根 `SKILL.md`。
 
-抓取失败时降级 **WebSearch**（Google 学术**无**专利类型过滤；Google Patents 支持 PATENT/DESIGN，实用新型靠关键词+国知局）。
+抓取失败时降级 **WebSearch**。技术查新覆盖相关发明与实用新型，国知局用`--type all`或分两类检索后合并；Google Patents支持PATENT/DESIGN，不以“实用新型”关键词限制整体范围。Google学术及适用非专利资料按问题补查，细则见`../prompts/prior_art_search.md`。
 
 ---
 

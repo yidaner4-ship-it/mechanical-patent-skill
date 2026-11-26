@@ -1,4 +1,4 @@
 interface:
   display_name: "Fusion 生产级精细建模"
-  short_description: "按现实零件形态逐件落实工艺、真实连接、圆角管线及装配运动检查的三维建模"
-  default_prompt: "使用 $fusion-production-modeling 按我的方案建立贴近现实零件、可制造可装配的精细三维总装，依据实际规格细化操作件、法兰和接头，落实倒角圆角及圆滑管线，并交付可编辑模型与逐件核查记录。"
+  short_description: "从需求与计算选型到真实零件、工艺装配和实物核对的机械设计建模"
+  default_prompt: "使用 $fusion-production-modeling 从需求指标和简洁可行方案开始，按计算与真实采购配置完成机械设计及精细总装；涉及申请专利时提前查新并审查改进收益和新增复杂度。逐件落实工艺、真实连接、公差和拆装，分阶段验证并交付同版模型、STEP、BOM及必要制造图；有实物后测量和运行核对，明确实际证据与待验证事项。"

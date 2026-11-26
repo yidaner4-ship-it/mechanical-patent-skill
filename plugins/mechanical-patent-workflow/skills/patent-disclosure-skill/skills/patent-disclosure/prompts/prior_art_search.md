@@ -6,13 +6,15 @@
 
 生成交底书全文之前或生成过程中执行；检索结论写入第一章 **1.1 现有技术** 及与本案的区别论述。
 
+涉及机械方案设计时，按[工程价值、可专利性与必要性](../references/engineering-value-and-patentability.md)将初检提前到关键改进与结构细化前，用于选择有实际收益的方向。已有同案有效证据直接复用，设计变化后按受影响的问题、手段和保护层次补检；不等到模型全部细化后才首次判断核心构思是否已有。纯粹依据既有材料成文时，不因此擅自重设计产品。
+
 ## 检索渠道（优先国知局公布公告站，再降级 WebSearch）
 
 ### A. 中国专利公布公告（优先，官方站点）
 
 1. **站点**：[国家知识产权局 中国专利公布公告](http://epub.cnipa.gov.cn/)（`epub.cnipa.gov.cn`）。
 2. **工具**（本仓库 **`skills/patent-disclosure/tools/crawl/`**）：**`cnipa_epub_search.py`** —— 一步完成公布站检索与结果解析（Playwright 过站点 WAF）；结果页 HTML 仅在内存中处理。成功时终端含 **`EPUB_NOTE:`** / **`EPUB_HITS_JSON:`**。
-3. **专利类型过滤（与 intake 一致）**：官网首页勾选发明公布 / 发明授权 / 实用新型 / 外观设计。脚本参数 **`--type invention|utility_model|design|all`**（默认 `all`）。intake 默认为发明时传 **`--type invention`**；实用新型 / 外观分别传 `utility_model` / `design`。映射见 **`references/patent_type_search.yaml`** 与 **`tools/patent_type.py`**。
+3. **检索范围与拟申请类型分开**：官网首页可勾选发明公布 / 发明授权 / 实用新型 / 外观设计；脚本支持 **`--type invention|utility_model|design|all`**（默认 `all`）。发明、实用新型的技术查新须覆盖相关发明与实用新型，不能按intake的拟申请类型限缩为单一类；本脚本采用 **`--type all`**，按技术主题、IPC及内容相关性筛选。`all`亦包含外观条目，不能仅因命中就把其未披露的内部结构或功能当作证据；噪声过多时可分别检索`invention`与`utility_model`后合并。外观设计继续用 **`--type design`** 及LOC等专用规则。选项能力见 **`references/patent_type_search.yaml`** 与 **`tools/patent_type.py`**，选项名称不决定本案所需的现有技术范围。
 3b. **邻域召回 + 摘要精排（写 1.1 前必做）**
 
    1.1 只写精排池。技能不自建专利库、不用本地向量索引。当场搭「小类邻域」，再用 LLM 对照摘要精排。
@@ -22,8 +24,8 @@
    3. **第二轮（邻域快照）**：同一 `--type`，加 **`--class`**（`--ipc` / `--loc` 同义）。**一次命令 1 个最贴分类号 × 1 个最贴手段词**（`tools/crawl/cnipa_epub_wait.yaml` 的 `advanced_max_*`）。第二个号或第二个词再发一条命令，至多 **1～2 个手段词**。仍用公布模式 10 条首页。脚本走公布站 **高级查询**（分类号 + 名称），例如：
 
       ```bash
-      python …/cnipa_epub_search.py --type invention --class B01J20 胺功能化
-      python …/cnipa_epub_search.py --type invention --class B01D53 胺功能化
+      python …/cnipa_epub_search.py --type all --class B01J20 胺功能化
+      python …/cnipa_epub_search.py --type all --class B01D53 胺功能化
       python …/cnipa_epub_search.py --type design --class 26-05 台灯
       python …/cnipa_epub_search.py --type design --class 26-05
       ```
@@ -45,7 +47,7 @@
       | 检索渠道 | 公布公告站 | 需登录的专利检索及分析系统 |
 
    4. **候选池**：两轮去重（`pub_number`）；优先同分类号。
-   5. **Google Patents（可选补充）**：外网可能被墙。**至多尝试一次** WebSearch / 浏览器，查询串用 `patent_type.google_patents_websearch_query(核心词, type, class_codes)`（发明/实用含 `CPC=…/low`，外观带 LOC 号 + `type:DESIGN`）。超时、被墙、0 条 → 跳过，不阻塞 1.1。有命中可并入候选池，中国专利 URL 仍抄国知局 `link`。
+   5. **Google Patents（可选补充）**：外网可能被墙。**至多尝试一次** WebSearch / 浏览器，查询串可用 `patent_type.google_patents_websearch_query(核心词, 检索范围, class_codes)`：技术查新传`all`覆盖发明与实用新型，可按需要加PATENT域及`CPC=…/low`，不把“实用新型”或某一种公开号尾码设为整体检索的必需条件；外观传`design`、带LOC号及`type:DESIGN`。超时、被墙、0条则跳过，不阻塞1.1。有命中可并入候选池，中国专利URL仍抄国知局`link`。
    6. **精排（必做，LLM 打分）**：对候选每条 **`abstract`** 对照本案「**技术问题 + 手段**」打 0–5 分（推理过程内完成）：
 
       | 分 | 含义 |
@@ -72,10 +74,10 @@
 
    - **拆分责任在 Agent**：在生成/构造命令阶段，从本案技术方案、专利点或用户主题中归纳 **3～4 个手段短语**（脚本首页上限 `home_max_terms` 默认 4），**仅用 ASCII 空格分隔**，再写入 `cnipa_epub_search.py` 的参数。每一单位为宜 **有检索意义的语义块**：专业术语、名词短语、名动组合（如「批量调度」「异构调度」）、业内固定搭配。4 个狠词优于 8 个泛词。
    - **Agent 执行时**：**一次进程传入全部检索单位**（多个 argv 或空格分隔均可）。脚本在**同一浏览器**内一词一查再合并，公布模式每页 10 条。若单次环境超时，再拆成至多两批，每批仍共用一个浏览器。
-   - 示意（须按本案替换；**一次调用、多个词**；类型按 intake）：
+   - 示意（须按本案替换；**一次调用、多个词**；检索范围按上文第3点，与intake的拟申请类型分别管理）：
 
      ```bash
-     python …skills/patent-disclosure/tools/crawl/cnipa_epub_search.py --type invention 知识库 检索增强 大语言模型
+     python …skills/patent-disclosure/tools/crawl/cnipa_epub_search.py --type all 知识库 检索增强 大语言模型
      ```
 
    | 场景 | 正例 | 反例 |
@@ -98,7 +100,7 @@
    - 探测或启动仍失败 → 进入 **B**（WebSearch）。
 
    ```bash
-   python skills/patent-disclosure/tools/crawl/cnipa_epub_search.py --type invention 词甲 词乙 词丙
+   python skills/patent-disclosure/tools/crawl/cnipa_epub_search.py --type all 词甲 词乙 词丙
    ```
 
    - **合并**：一次调用若 stderr 含 **`EPUB_MERGE:`**，以 **stdout** 上**唯一一行** **`EPUB_HITS_JSON:`** 为准（脚本已按 `pub_number` 去重）。仅当拆成多批调用时，Agent 再按 **`pub_number`**（无则 **`link`**）合并。
@@ -131,15 +133,14 @@
 
 ### B. Google 学术与 Google Patents（降级 / 补充）
 
-在 **A 不可用或结果不足**时启用。类型过滤能力见 **`references/patent_type_search.yaml`**：
+专利渠道在 **A 不可用或结果不足**时降级或补充；与关键问题、常规替代、工艺或效果依据相关的论文、标准、产品及供方公开资料按需补查，不以A失败为前提。保留实际来源、可核公开时间及具体披露内容；轻量初检的渠道和覆盖不足如实记录，不等同于完整可专利性结论。类型过滤能力见 **`references/patent_type_search.yaml`**：
 
 1. **中文文献与学术**：[Google 学术搜索](https://scholar.google.com)（`scholar.google.com`）。
    - 界面上没有发明 / 实用新型 / 外观设计勾选；类型案件仍用技术关键词检索论文等 NPL。
    - 用中文关键词、技术方案核心术语、应用场景；可组合 2–3 组查询。
    - 通过 WebSearch 或浏览器检索；优先可打开且与标题/作者匹配的链接。
 2. **专利公开文献（补充）**：[Google Patents](https://patents.google.com/)。
-   - **发明**：界面/参数倾向 **Patent（`type=PATENT`）** + `country:CN`；公开号常见 `CN…A` / `CN…B`。第二轮分类号可拼 `CPC=B01J20/low`（见 3b.5，外网不通则跳过）。
-   - **实用新型**：用 Patent 域 + 关键词「实用新型」或公开号 `…U` 收窄，类型过滤仍以国知局 A 渠道为准。
+   - **发明/实用新型的技术查新**：覆盖相关发明与实用新型，可在Patent域按技术词检索；`country:CN`用于本轮中国专利范围，必要时按具体问题补查其他国家公开。不得因拟申请实用新型就将“实用新型”或`…U`尾码作为整体检索的必需条件，也不得仅保留`CN…A`/`CN…B`。这些类型词和尾码只用于需要时补查相应子集，所得结果须合并判断。第二轮分类号可拼`CPC=B01J20/low`（见3b.5，外网不通则跳过）。
    - **外观**：勾选 / 使用 **Design（`type=DESIGN`）** + `country:CN`；公开号常见 `…S`。可把 LOC 号（如 `26-05`）当作补充词。
    - 每条使用稳定著录页 URL；查询串可参考 `tools/patent_type.google_patents_websearch_query`。
 3. **其它来源**：英文文献、非中国专利等可继续用 Google Patents、出版社页面、DOI、arXiv 等 + WebSearch。
@@ -214,6 +215,8 @@
 ### 3. 门禁（三态；三态都进 Step 6）
 
 轻量查新锁「最接近」证据有限。门禁管的是**创造性骨架写到哪一档**，三态都进交底成文。写得出具体区别时，用「带疑点过」并标明证据级别。
+
+三态是成文的证据分级，不代替申请价值、可授权性或工程验证结论。新增区别还须说明具体作用机理、效果证据及收益与复杂度取舍；发现核心构思已公开、改进较常规或收益不足时如实说明，不为提高门禁状态而拼凑机构、特殊尺寸或无关功能。相互支持的特征整体评价，普通安装件的数量和外形复杂度不替代技术贡献。
 
 | 状态 | 何时 | 下一步 |
 |------|------|--------|
