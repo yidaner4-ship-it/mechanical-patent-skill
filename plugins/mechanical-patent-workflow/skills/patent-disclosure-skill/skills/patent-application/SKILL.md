@@ -32,8 +32,8 @@ metadata:
 
 1. **`Read`** `prompts/guardrails.md` → `intake.md`。首次起草和改稿均先定位用户指定或本案已确认的 Word 母版，按[用户模板套版](../../../mechanical-patent-drawings/references/drafting-and-review.md#用户模板套版)制作拟交付文件。
 2. 已有申请产出上改稿（未要求整案重写）：**`Read`** `iteration_context.md` → `iteration.md`；不重做首次材料门禁，完成本轮修改后仍回共用收尾。
-3. 跑 `tools/material_gate.py --case-dir <交底目录> --type <核定类型> --subject-kind <核定对象>`；退出码2先核缺件／误分类，能内部整理则补齐，不能补齐则完成其余有依据部分，不宣称整套定稿。
-4. 发明 / 实用新型：`claim_strategy.md` → `claims_builder.md` → `figure_plan.md` → `figures.md` → `specification_builder.md` → `numeral_register.md` → `consistency.md`
+3. 仅首次起草跑 `tools/material_gate.py --case-dir <交底目录> --type <核定类型> --subject-kind <核定对象>`；已有稿迭代跳过本步，沿用第2步的有效材料和修改范围。退出码2先核缺件／误分类，能内部整理则补齐，不能补齐则完成其余有依据部分，不宣称整套定稿。
+4. 发明 / 实用新型按依赖次序加载：`claim_strategy.md`、`claims_builder.md`确定保护构思及权项；`figure_plan.md`、`figures.md`依据当前权项规划及制作附图；`specification_builder.md`完成说明书和摘要；`numeral_register.md`、`consistency.md`核对全稿。机械结构案按[执行调度](../../../mechanical-patent-drawings/references/drafting-and-review.md#执行调度)前移初步检索并协同正文与附图，已有稿从受影响环节进入；并行仍须满足可信图源、技术支持及实际成稿核验要求。
 5. 外观：先 `Read` `references/design_view_cnipa.md`，只走 `design_application.md`；跑本包 `check_design_views.py`
 6. 用 `tools/emit_application_docx.py` 输出 Word。有用户指定或本案已确认的母版时，通用脚本的 Word 作为内容中间稿，在母版副本制成正式 Word。机械案回[共用收尾](../../../mechanical-patent-drawings/references/drafting-and-review.md#共用收尾)，完成适用的定稿检索、[独立质检](../../../shensheng-patent-qa/SKILL.md)、整改、渲染及隐私清理；其他案件执行其适用检查。最后读 `issues.md`，在问题清单及同一条交付回复中说明实际完成状态和待确认项。
 
