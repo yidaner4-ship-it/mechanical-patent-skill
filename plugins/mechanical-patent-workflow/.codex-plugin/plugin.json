@@ -1,6 +1,6 @@
 {
   "name": "mechanical-patent-workflow",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "机械专利全流程：制造装配级建模、交底、申请正文、CAD附图、检索、独立质检与清洁完稿。",
   "author": {
     "name": "申晟知识产权"
